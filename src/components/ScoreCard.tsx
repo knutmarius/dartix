@@ -1,16 +1,20 @@
 import {
   NumberInput,
   Table,
-  Title,
   Text,
   Stack,
   Paper,
   Tooltip,
   Box,
+  ActionIcon,
+  Group,
+  Modal,
+  Button,
 } from "@mantine/core";
+import { IconTrash } from "@tabler/icons-react";
 import { useGame } from "../context/GameContext";
 import { ROUNDS } from "../types/game";
-import { useRef } from "react";
+import { useState } from "react";
 
 function getRoundHelp(roundId: string): string {
   switch (roundId) {
@@ -31,11 +35,10 @@ function getRoundHelp(roundId: string): string {
 
 export function ScoreCard() {
   const { state, dispatch } = useGame();
-  const inputRefs = useRef<(HTMLInputElement | null)[][]>(
-    Array(ROUNDS.length)
-      .fill(null)
-      .map(() => Array(state.players.length).fill(null))
-  );
+  const [playerToRemove, setPlayerToRemove] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const handleScoreChange = (
     playerId: string,
@@ -47,178 +50,204 @@ export function ScoreCard() {
       type: "UPDATE_SCORE",
       payload: { playerId, roundIndex, input: input ?? null },
     });
+  };
 
-    // Auto-tab for single-digit inputs (all rounds except doubles and triples)
-    const round = ROUNDS[roundIndex];
-    if (
-      input !== undefined &&
-      round.type !== "doubles" &&
-      round.type !== "triples"
-    ) {
-      // Find next input position
-      let nextRound = roundIndex;
-      let nextPlayer = playerIndex + 1;
-
-      // If we're at the last player, move to next round
-      if (nextPlayer >= state.players.length) {
-        nextPlayer = 0;
-        nextRound++;
-      }
-
-      // If we have a next input, focus it
-      if (nextRound < ROUNDS.length) {
-        const nextInput = inputRefs.current[nextRound]?.[nextPlayer];
-        if (nextInput) {
-          nextInput.focus();
-        }
-      }
+  const handleRemovePlayer = () => {
+    if (playerToRemove) {
+      dispatch({ type: "REMOVE_PLAYER", payload: playerToRemove.id });
+      setPlayerToRemove(null);
     }
   };
 
   return (
     <Stack spacing="xl">
       <Paper>
-        <Stack spacing="lg">
-          <Title order={2} align="center">
-            Score Card
-          </Title>
-
-          <Box sx={{ overflowX: "auto" }}>
-            <Table
-              striped
-              highlightOnHover
-              withBorder
-              withColumnBorders
-              fontSize="md"
-              sx={(theme) => ({
-                "& thead th": {
-                  backgroundColor: theme.colors.gray[0],
-                  fontWeight: 600,
-                  fontSize: "1.1rem",
-                  padding: "1rem",
-                  textAlign: "center",
+        <Box sx={{ overflowX: "auto" }}>
+          <Table
+            striped
+            highlightOnHover
+            withBorder
+            withColumnBorders
+            fontSize="md"
+            sx={(theme) => ({
+              "& thead th": {
+                backgroundColor: theme.colors.gray[0],
+                fontWeight: 600,
+                fontSize: "1.1rem",
+                padding: "1rem",
+                textAlign: "center",
+                whiteSpace: "nowrap",
+                minWidth: "130px",
+              },
+              "& thead th:first-child": {
+                textAlign: "left",
+              },
+              "& thead th:not(:first-child)": {
+                "& .mantine-Group-root": {
+                  width: "80px",
+                  margin: "0 auto",
                 },
-                "& tbody td": {
-                  padding: "0.75rem 1rem",
-                  textAlign: "center",
-                },
-                "& tbody tr:hover": {
-                  backgroundColor: theme.colors.blue[0],
-                },
-              })}
-            >
-              <thead>
-                <tr>
-                  <th style={{ width: "120px" }}>Round</th>
-                  {state.players.map((player) => (
-                    <th key={player.id}>{player.name}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {ROUNDS.map((round, roundIndex) => (
-                  <tr key={round.id}>
-                    <td>
-                      <Tooltip
-                        label={getRoundHelp(round.id)}
-                        position="right"
-                        multiline
-                        width={300}
-                      >
-                        <Text
-                          weight={
-                            roundIndex === state.currentRound
-                              ? "bold"
-                              : "normal"
-                          }
-                          size="md"
-                          color={
-                            roundIndex === state.currentRound
-                              ? "blue"
-                              : "inherit"
-                          }
-                        >
-                          {round.label}
-                        </Text>
-                      </Tooltip>
-                    </td>
-                    {state.players.map((player, playerIndex) => (
-                      <td key={player.id}>
-                        <NumberInput
-                          ref={(el) => {
-                            if (el) {
-                              inputRefs.current[roundIndex][playerIndex] =
-                                el.querySelector("input");
-                            }
-                          }}
-                          value={player.inputs[roundIndex] ?? null}
-                          onChange={(value) =>
-                            handleScoreChange(
-                              player.id,
-                              roundIndex,
-                              playerIndex,
-                              value
-                            )
-                          }
-                          min={0}
-                          max={round.maxInput}
-                          placeholder=""
-                          hideControls
-                          allowDecimal={false}
-                          clampBehavior="strict"
-                          styles={(theme) => ({
-                            input: {
-                              width: "80px",
-                              backgroundColor: theme.colors.gray[0],
-                              border:
-                                roundIndex === state.currentRound
-                                  ? `2px solid ${theme.colors.blue[6]}`
-                                  : undefined,
-                              fontSize: "1.1rem",
-                              textAlign: "center",
-                              padding: "0.5rem",
-                              margin: "0 auto",
-                              "&:focus": {
-                                backgroundColor: "#fff",
-                                borderColor: theme.colors.blue[6],
-                              },
-                            },
-                            wrapper: {
-                              width: "80px",
-                              margin: "0 auto",
-                            },
-                          })}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-                <tr>
-                  <td>
-                    <Text weight="bold" size="lg">
-                      Total
-                    </Text>
-                  </td>
-                  {state.players.map((player) => (
-                    <td key={player.id} style={{ width: "80px" }}>
-                      <div
+              },
+              "& tbody td": {
+                padding: "0.75rem 1rem",
+                textAlign: "center",
+              },
+              "& tbody td:first-child": {
+                textAlign: "left",
+              },
+              "& tbody tr:hover": {
+                backgroundColor: theme.colors.blue[0],
+              },
+            })}
+          >
+            <thead>
+              <tr>
+                <th style={{ width: "120px", textAlign: "left" }}>Round</th>
+                {state.players.map((player) => (
+                  <th key={player.id}>
+                    <Group
+                      justify="space-between"
+                      align="center"
+                      style={{
+                        width: "80px",
+                        margin: "0 auto",
+                      }}
+                    >
+                      <Text
                         style={{
-                          width: "80px",
-                          margin: "0 auto",
+                          flex: 1,
                           textAlign: "center",
+                          marginRight: "4px",
+                          maxWidth: "calc(100% - 24px)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                        truncate
+                      >
+                        {player.name}
+                      </Text>
+                      <ActionIcon
+                        color="red"
+                        variant="subtle"
+                        onClick={() =>
+                          setPlayerToRemove({
+                            id: player.id,
+                            name: player.name,
+                          })
+                        }
+                        size="sm"
+                        style={{
+                          flexShrink: 0,
+                          width: "20px",
+                          height: "20px",
                         }}
                       >
-                        <Text weight="bold" size="lg" color="blue">
-                          {player.totalScore}
-                        </Text>
-                      </div>
+                        <IconTrash size="1rem" />
+                      </ActionIcon>
+                    </Group>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {ROUNDS.map((round, roundIndex) => (
+                <tr key={round.id}>
+                  <td>
+                    <Tooltip
+                      label={getRoundHelp(round.id)}
+                      position="right"
+                      multiline
+                      width={300}
+                    >
+                      <Text
+                        weight={
+                          roundIndex === state.currentRound ? "bold" : "normal"
+                        }
+                        size="md"
+                        color={
+                          roundIndex === state.currentRound ? "blue" : "inherit"
+                        }
+                      >
+                        {round.label}
+                      </Text>
+                    </Tooltip>
+                  </td>
+                  {state.players.map((player, playerIndex) => (
+                    <td key={player.id}>
+                      <NumberInput
+                        value={player.inputs[roundIndex] ?? null}
+                        onChange={(value) =>
+                          handleScoreChange(
+                            player.id,
+                            roundIndex,
+                            playerIndex,
+                            value
+                          )
+                        }
+                        min={0}
+                        max={round.maxInput}
+                        placeholder=""
+                        hideControls
+                        allowDecimal={false}
+                        clampBehavior="strict"
+                        styles={(theme) => ({
+                          input: {
+                            width: "80px",
+                            backgroundColor:
+                              player.inputs[roundIndex] === null ||
+                              player.inputs[roundIndex] === undefined
+                                ? undefined
+                                : player.inputs[roundIndex] === 0
+                                ? theme.colors.red[1]
+                                : theme.colors.green[1],
+                            border:
+                              roundIndex === state.currentRound
+                                ? `2px solid ${theme.colors.blue[6]}`
+                                : undefined,
+                            fontSize: "1.1rem",
+                            textAlign: "center",
+                            padding: "0.5rem",
+                            margin: "0 auto",
+                            "&:focus": {
+                              backgroundColor: "#fff",
+                              borderColor: theme.colors.blue[6],
+                            },
+                          },
+                          wrapper: {
+                            width: "80px",
+                            margin: "0 auto",
+                          },
+                        })}
+                      />
                     </td>
                   ))}
                 </tr>
-              </tbody>
-            </Table>
-          </Box>
-        </Stack>
+              ))}
+              <tr>
+                <td>
+                  <Text weight="bold" size="lg">
+                    Total
+                  </Text>
+                </td>
+                {state.players.map((player) => (
+                  <td key={player.id} style={{ width: "80px" }}>
+                    <div
+                      style={{
+                        width: "80px",
+                        margin: "0 auto",
+                        textAlign: "center",
+                      }}
+                    >
+                      <Text weight="bold" size="lg" color="blue">
+                        {player.totalScore}
+                      </Text>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </Table>
+        </Box>
       </Paper>
 
       {state.isGameComplete && (
@@ -233,6 +262,25 @@ export function ScoreCard() {
           </Text>
         </Paper>
       )}
+
+      <Modal
+        opened={!!playerToRemove}
+        onClose={() => setPlayerToRemove(null)}
+        title="Remove Player"
+        centered
+      >
+        <Stack>
+          <Text>Are you sure you want to remove {playerToRemove?.name}?</Text>
+          <Group position="right">
+            <Button variant="subtle" onClick={() => setPlayerToRemove(null)}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleRemovePlayer}>
+              Remove
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Stack>
   );
 }
