@@ -208,9 +208,15 @@ export function ScoreCard() {
                             textAlign: "center",
                             padding: "0.5rem",
                             margin: "0 auto",
+                            color:
+                              player.inputs[roundIndex] !== null &&
+                              player.inputs[roundIndex] !== undefined
+                                ? theme.black
+                                : undefined,
                             "&:focus": {
                               backgroundColor: "#fff",
                               borderColor: theme.colors.blue[6],
+                              color: theme.black,
                             },
                           },
                           wrapper: {
