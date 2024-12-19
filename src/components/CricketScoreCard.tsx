@@ -4,36 +4,26 @@ import {
   Text,
   Stack,
   Paper,
-  Tooltip,
   Box,
   ActionIcon,
   Group,
   Modal,
   Button,
+  Tooltip,
 } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { useGame } from "../context/GameContext";
-import { HALFIT_ROUNDS } from "../types/game";
+import { CRICKET_TARGETS } from "../types/game";
 import { useState } from "react";
 
-function getRoundHelp(roundId: string): string {
-  switch (roundId) {
-    case "D":
-      return "Enter the sum of the numbers you hit in doubles (e.g., for 3xD20, enter 60 to score 120 points)";
-    case "T":
-      return "Enter the sum of the numbers you hit in triples (e.g., for 3xT20, enter 60 to score 180 points)";
-    case "41":
-      return "Enter 1 if you hit exactly 41 with three darts, 0 if you missed (scores 41 or 0 points)";
-    case "B":
-      return "Enter number of bulls hit (2 for green + red = 75 points, 3 for green + 2 red = 125 points)";
-    default:
-      return `Enter number of ${roundId}s hit (1 hit = ${Number(
-        roundId
-      )} points, max 9 hits = ${Number(roundId) * 9} points)`;
+function getTargetHelp(target: string): string {
+  if (target === "B") {
+    return "Enter number of bulls hit (both inner and outer count as 1)";
   }
+  return `Enter number of ${target}s hit (singles count as 1, doubles as 2, triples as 3)`;
 }
 
-export function ScoreCard() {
+export function CricketScoreCard() {
   const { state, dispatch } = useGame();
   const [playerToRemove, setPlayerToRemove] = useState<{
     id: string;
@@ -102,7 +92,7 @@ export function ScoreCard() {
           >
             <thead>
               <tr>
-                <th style={{ width: "120px", textAlign: "left" }}>Round</th>
+                <th style={{ width: "120px" }}>Target</th>
                 {state.players.map((player) => (
                   <th key={player.id}>
                     <Group
@@ -150,32 +140,22 @@ export function ScoreCard() {
               </tr>
             </thead>
             <tbody>
-              {HALFIT_ROUNDS.map((round, roundIndex) => (
-                <tr key={round.id}>
+              {CRICKET_TARGETS.map((target, roundIndex) => (
+                <tr key={target}>
                   <td>
                     <Tooltip
-                      label={getRoundHelp(round.id)}
+                      label={getTargetHelp(target)}
                       position="right"
                       multiline
                       width={300}
                     >
-                      <Text
-                        weight={
-                          roundIndex === state.currentRound ? "bold" : "normal"
-                        }
-                        size="md"
-                        color={
-                          roundIndex === state.currentRound ? "blue" : "inherit"
-                        }
-                      >
-                        {round.label}
-                      </Text>
+                      <Text size="md">{target === "B" ? "Bull" : target}</Text>
                     </Tooltip>
                   </td>
                   {state.players.map((player, playerIndex) => (
                     <td key={player.id}>
                       <NumberInput
-                        value={player.inputs[roundIndex] ?? null}
+                        value={player.cricketScores?.[target] ?? null}
                         onChange={(value) =>
                           handleScoreChange(
                             player.id,
@@ -185,7 +165,7 @@ export function ScoreCard() {
                           )
                         }
                         min={0}
-                        max={round.maxInput}
+                        max={9}
                         placeholder=""
                         hideControls
                         allowDecimal={false}
@@ -193,24 +173,19 @@ export function ScoreCard() {
                         styles={(theme) => ({
                           input: {
                             width: "80px",
-                            backgroundColor:
-                              player.inputs[roundIndex] === null ||
-                              player.inputs[roundIndex] === undefined
-                                ? undefined
-                                : player.inputs[roundIndex] === 0
-                                ? theme.colors.red[1]
-                                : theme.colors.green[1],
-                            border:
-                              roundIndex === state.currentRound
-                                ? `2px solid ${theme.colors.blue[6]}`
-                                : undefined,
+                            backgroundColor: !player.cricketScores?.[target]
+                              ? undefined
+                              : player.cricketScores[target] === 0
+                              ? theme.colors.red[1]
+                              : player.cricketScores[target] >= 3
+                              ? theme.colors.green[1]
+                              : theme.colors.yellow[1],
                             fontSize: "1.1rem",
                             textAlign: "center",
                             padding: "0.5rem",
                             margin: "0 auto",
                             color:
-                              player.inputs[roundIndex] !== null &&
-                              player.inputs[roundIndex] !== undefined
+                              player.cricketScores?.[target] !== undefined
                                 ? theme.black
                                 : undefined,
                             "&:focus": {

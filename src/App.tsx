@@ -9,7 +9,8 @@ import {
 } from "@mantine/core";
 import { PlayerRegistration } from "./components/PlayerRegistration";
 import { ScoreCard } from "./components/ScoreCard";
-import { GameProvider } from "./context/GameContext";
+import { CricketScoreCard } from "./components/CricketScoreCard";
+import { GameProvider, useGame } from "./context/GameContext";
 import { AppBar } from "./components/AppBar";
 import "@fontsource/inter";
 import { useState } from "react";
@@ -39,6 +40,11 @@ const theme = createTheme({
   },
 });
 
+function GameContent() {
+  const { state } = useGame();
+  return state.gameMode === "halfit" ? <ScoreCard /> : <CricketScoreCard />;
+}
+
 export default function App() {
   const [colorScheme, setColorScheme] = useState<ColorScheme>("light");
 
@@ -46,7 +52,6 @@ export default function App() {
     const nextColorScheme =
       value || (colorScheme === "dark" ? "light" : "dark");
     setColorScheme(nextColorScheme);
-    // You can also persist the color scheme to localStorage here if needed
   };
 
   return (
@@ -66,7 +71,7 @@ export default function App() {
               <Container size="xs" py={80}>
                 <Stack gap="xl">
                   <PlayerRegistration />
-                  <ScoreCard />
+                  <GameContent />
                 </Stack>
               </Container>
             </AppShell.Main>

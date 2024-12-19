@@ -7,14 +7,18 @@ import {
   Stack,
   Switch,
   useMantineColorScheme,
+  Select,
+  Text,
 } from "@mantine/core";
 import { IconSettings, IconSun, IconMoon } from "@tabler/icons-react";
 import { Logo } from "./Logo";
 import { useState } from "react";
+import { useGame } from "../context/GameContext";
 
 export function AppBar() {
   const [opened, setOpened] = useState(false);
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { state, dispatch } = useGame();
 
   return (
     <AppShell.Header height={60}>
@@ -47,7 +51,22 @@ export function AppBar() {
                 </ActionIcon>
               </Popover.Target>
               <Popover.Dropdown>
-                <Stack gap="sm">
+                <Stack gap="md">
+                  <div>
+                    <Text size="sm" mb={4}>
+                      Game Mode
+                    </Text>
+                    <Select
+                      value={state.gameMode}
+                      onChange={(value) =>
+                        dispatch({ type: "SET_GAME_MODE", payload: value })
+                      }
+                      data={[
+                        { value: "halfit", label: "Half-It" },
+                        { value: "cricket", label: "Cricket" },
+                      ]}
+                    />
+                  </div>
                   <Group gap="sm">
                     <IconSun size="1.2rem" />
                     <Switch
