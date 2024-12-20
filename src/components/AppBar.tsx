@@ -64,6 +64,7 @@ export function AppBar() {
                       data={[
                         { value: "halfit", label: "Half-It" },
                         { value: "cricket", label: "Cricket" },
+                        { value: "501", label: "501" },
                       ]}
                     />
                   </div>

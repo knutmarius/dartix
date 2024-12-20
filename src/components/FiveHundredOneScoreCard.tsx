@@ -4,42 +4,57 @@ import {
   Text,
   Stack,
   Paper,
-  Tooltip,
   Box,
   ActionIcon,
   Group,
   Modal,
   Button,
+  Tooltip,
   Center,
 } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { useGame } from "../context/GameContext";
-import { HALFIT_ROUNDS } from "../types/game";
-import { useState } from "react";
+import { FIVEHUNDREDONE_ROUNDS, CHECKOUT_SUGGESTIONS } from "../types/game";
+import { useState, useMemo } from "react";
 
-function getRoundHelp(roundId: string): string {
-  switch (roundId) {
-    case "D":
-      return "Enter the sum of the numbers you hit in doubles (e.g., for 3xD20, enter 60 to score 120 points)";
-    case "T":
-      return "Enter the sum of the numbers you hit in triples (e.g., for 3xT20, enter 60 to score 180 points)";
-    case "41":
-      return "Enter 1 if you hit exactly 41 with three darts, 0 if you missed (scores 41 or 0 points)";
-    case "B":
-      return "Enter number of bulls hit (2 for green + red = 75 points, 3 for green + 2 red = 125 points)";
-    default:
-      return `Enter number of ${roundId}s hit (1 hit = ${Number(
-        roundId
-      )} points, max 9 hits = ${Number(roundId) * 9} points)`;
+function getCheckoutSuggestion(remaining: number): string {
+  if (remaining > 170) return "";
+  if (remaining < 2) return "";
+  if (remaining in CHECKOUT_SUGGESTIONS) {
+    return CHECKOUT_SUGGESTIONS[remaining].join(" → ");
   }
+  // For numbers without predefined checkouts, provide a simple suggestion
+  if (remaining <= 40 && remaining % 2 === 0) {
+    return `D${remaining / 2}`;
+  }
+  return "";
 }
 
-export function ScoreCard() {
+export function FiveHundredOneScoreCard() {
   const { state, dispatch } = useGame();
   const [playerToRemove, setPlayerToRemove] = useState<{
     id: string;
     name: string;
   } | null>(null);
+
+  // Calculate the number of rounds needed based on filled inputs
+  const rounds = useMemo(() => {
+    const maxFilledRound = state.players.reduce((maxRound, player) => {
+      const lastFilledIndex = player.inputs.reduce(
+        (lastIndex, input, index) => {
+          return input !== null ? index : lastIndex;
+        },
+        -1
+      );
+      return Math.max(maxRound, lastFilledIndex);
+    }, -1);
+
+    // Always show at least one round, and add one more if all current rounds are filled
+    const numRounds = Math.max(1, maxFilledRound + 2);
+    return Array.from({ length: numRounds }, (_, i) =>
+      FIVEHUNDREDONE_ROUNDS.createRound(i)
+    );
+  }, [state.players]);
 
   const handleScoreChange = (
     playerId: string,
@@ -96,12 +111,6 @@ export function ScoreCard() {
               "& thead th:first-child": {
                 textAlign: "left",
               },
-              "& thead th:not(:first-child)": {
-                "& .mantine-Group-root": {
-                  width: "80px",
-                  margin: "0 auto",
-                },
-              },
               "& tbody td": {
                 padding: "0.75rem 1rem",
                 textAlign: "center",
@@ -116,7 +125,7 @@ export function ScoreCard() {
           >
             <thead>
               <tr>
-                <th style={{ width: "120px", textAlign: "left" }}>Round</th>
+                <th style={{ width: "120px" }}>Round</th>
                 {state.players.map((player) => (
                   <th key={player.id}>
                     <Group
@@ -164,27 +173,20 @@ export function ScoreCard() {
               </tr>
             </thead>
             <tbody>
-              {HALFIT_ROUNDS.map((round, roundIndex) => (
+              {rounds.map((round, roundIndex) => (
                 <tr key={round.id}>
                   <td>
-                    <Tooltip
-                      label={getRoundHelp(round.id)}
-                      position="right"
-                      multiline
-                      width={300}
+                    <Text
+                      weight={
+                        roundIndex === state.currentRound ? "bold" : "normal"
+                      }
+                      size="md"
+                      color={
+                        roundIndex === state.currentRound ? "blue" : "inherit"
+                      }
                     >
-                      <Text
-                        weight={
-                          roundIndex === state.currentRound ? "bold" : "normal"
-                        }
-                        size="md"
-                        color={
-                          roundIndex === state.currentRound ? "blue" : "inherit"
-                        }
-                      >
-                        {round.label}
-                      </Text>
-                    </Tooltip>
+                      {round.label}
+                    </Text>
                   </td>
                   {state.players.map((player, playerIndex) => (
                     <td key={player.id}>
@@ -246,22 +248,27 @@ export function ScoreCard() {
               <tr>
                 <td>
                   <Text weight="bold" size="lg">
-                    Total
+                    Remaining
                   </Text>
                 </td>
                 {state.players.map((player) => (
-                  <td key={player.id} style={{ width: "80px" }}>
-                    <div
-                      style={{
-                        width: "80px",
-                        margin: "0 auto",
-                        textAlign: "center",
-                      }}
-                    >
+                  <td key={player.id}>
+                    <Stack spacing={4} align="center">
                       <Text weight="bold" size="lg" color="blue">
-                        {player.totalScore}
+                        {501 - player.totalScore}
                       </Text>
-                    </div>
+                      {getCheckoutSuggestion(501 - player.totalScore) && (
+                        <Tooltip
+                          label="Suggested checkout"
+                          position="bottom"
+                          withArrow
+                        >
+                          <Text size="xs" color="dimmed">
+                            {getCheckoutSuggestion(501 - player.totalScore)}
+                          </Text>
+                        </Tooltip>
+                      )}
+                    </Stack>
                   </td>
                 ))}
               </tr>

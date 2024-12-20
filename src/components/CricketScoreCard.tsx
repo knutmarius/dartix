@@ -10,6 +10,7 @@ import {
   Modal,
   Button,
   Tooltip,
+  Center,
 } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { useGame } from "../context/GameContext";
@@ -48,6 +49,19 @@ export function CricketScoreCard() {
       setPlayerToRemove(null);
     }
   };
+
+  if (state.players.length === 0) {
+    return (
+      <Paper>
+        <Center>
+          <Text size="lg" c="dimmed">
+            Add at least one player to start the game. Change game mode in
+            settings.
+          </Text>
+        </Center>
+      </Paper>
+    );
+  }
 
   return (
     <Stack spacing="xl">

@@ -10,6 +10,7 @@ import {
 import { PlayerRegistration } from "./components/PlayerRegistration";
 import { ScoreCard } from "./components/ScoreCard";
 import { CricketScoreCard } from "./components/CricketScoreCard";
+import { FiveHundredOneScoreCard } from "./components/FiveHundredOneScoreCard";
 import { GameProvider, useGame } from "./context/GameContext";
 import { AppBar } from "./components/AppBar";
 import "@fontsource/inter";
@@ -42,7 +43,14 @@ const theme = createTheme({
 
 function GameContent() {
   const { state } = useGame();
-  return state.gameMode === "halfit" ? <ScoreCard /> : <CricketScoreCard />;
+  switch (state.gameMode) {
+    case "halfit":
+      return <ScoreCard />;
+    case "cricket":
+      return <CricketScoreCard />;
+    case "501":
+      return <FiveHundredOneScoreCard />;
+  }
 }
 
 export default function App() {

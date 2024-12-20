@@ -1,7 +1,7 @@
 export const MIN_PLAYERS = 1;
 export const MAX_PLAYERS = 8;
 
-export type GameMode = "halfit" | "cricket";
+export type GameMode = "halfit" | "cricket" | "501";
 
 export interface Player {
   id: string;
@@ -73,3 +73,22 @@ export const CRICKET_POINTS: Record<CricketTarget, number> = {
   "15": 15,
   B: 25,
 };
+
+export const FIVEHUNDREDONE_ROUNDS = {
+  createRound: (index: number) => ({
+    id: `round${index + 1}`,
+    label: `Round ${index + 1}`,
+    type: "501",
+    maxInput: 180,
+  }),
+} as const;
+
+// Common checkout combinations for 501
+export const CHECKOUT_SUGGESTIONS: Record<number, string[]> = {
+  170: ["T20", "T20", "Bull"],
+  167: ["T20", "T19", "Bull"],
+  164: ["T20", "T18", "Bull"],
+  161: ["T20", "T17", "Bull"],
+  160: ["T20", "T20", "D20"],
+  // Add more common checkouts as needed
+} as const;

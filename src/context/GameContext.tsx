@@ -8,6 +8,7 @@ import {
   HALFIT_ROUNDS,
   CRICKET_TARGETS,
   CRICKET_POINTS,
+  FIVEHUNDREDONE_ROUNDS,
 } from "../types/game";
 
 const initialState: GameState = {
@@ -70,6 +71,10 @@ function calculateCricketScore(player: Player, allPlayers: Player[]): number {
   return totalScore;
 }
 
+function calculate501Score(inputs: (number | null)[]): number {
+  return inputs.reduce((total, input) => total + (input ?? 0), 0);
+}
+
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case "ADD_PLAYER": {
@@ -78,11 +83,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const newPlayer: Player = {
         id: crypto.randomUUID(),
         name: action.payload,
-        inputs: Array(
-          state.gameMode === "halfit"
-            ? HALFIT_ROUNDS.length
-            : CRICKET_TARGETS.length
-        ).fill(null),
+        inputs:
+          state.gameMode === "501"
+            ? []
+            : Array(
+                state.gameMode === "halfit"
+                  ? HALFIT_ROUNDS.length
+                  : CRICKET_TARGETS.length
+              ).fill(null),
         totalScore: 0,
         cricketScores: state.gameMode === "cricket" ? {} : undefined,
       };
@@ -109,6 +117,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       const updatedPlayers = [...state.players];
       const player = { ...updatedPlayers[playerIndex] };
+
+      // Ensure the inputs array is long enough for 501 mode
+      if (state.gameMode === "501" && roundIndex >= player.inputs.length) {
+        player.inputs = [
+          ...player.inputs,
+          ...Array(roundIndex - player.inputs.length + 1).fill(null),
+        ];
+      }
+
       player.inputs[roundIndex] = input;
 
       // Calculate total score based on game mode
@@ -118,7 +135,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             total + calculateHalfItScore(player.inputs, index),
           0
         );
-      } else {
+      } else if (state.gameMode === "cricket") {
         // Update cricket scores
         if (!player.cricketScores) player.cricketScores = {};
         const target = CRICKET_TARGETS[roundIndex];
@@ -129,13 +146,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         updatedPlayers.forEach((p) => {
           p.totalScore = calculateCricketScore(p, updatedPlayers);
         });
+      } else if (state.gameMode === "501") {
+        player.totalScore = calculate501Score(player.inputs);
       }
 
       // Check if game is complete
       const isComplete =
         state.gameMode === "halfit"
           ? player.inputs.every((input) => input !== null)
-          : Object.values(player.cricketScores).every((marks) => marks >= 3);
+          : state.gameMode === "cricket"
+          ? Object.values(player.cricketScores ?? {}).every(
+              (marks) => marks >= 3
+            )
+          : player.totalScore === 501;
+
+      updatedPlayers[playerIndex] = player;
 
       return {
         ...state,
