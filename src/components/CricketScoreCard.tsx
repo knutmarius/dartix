@@ -34,7 +34,6 @@ export function CricketScoreCard() {
   const handleScoreChange = (
     playerId: string,
     roundIndex: number,
-    playerIndex: number,
     input: number | undefined
   ) => {
     dispatch({
@@ -64,16 +63,15 @@ export function CricketScoreCard() {
   }
 
   return (
-    <Stack spacing="xl">
+    <Stack gap="xl">
       <Paper>
-        <Box sx={{ overflowX: "auto" }}>
+        <Box style={{ overflowX: "auto" }}>
           <Table
             striped
             highlightOnHover
             withBorder
             withColumnBorders
-            fontSize="md"
-            sx={(theme) => ({
+            style={(theme) => ({
               "& thead th": {
                 backgroundColor: theme.colors.gray[0],
                 fontWeight: 600,
@@ -85,12 +83,6 @@ export function CricketScoreCard() {
               },
               "& thead th:first-child": {
                 textAlign: "left",
-              },
-              "& thead th:not(:first-child)": {
-                "& .mantine-Group-root": {
-                  width: "80px",
-                  margin: "0 auto",
-                },
               },
               "& tbody td": {
                 padding: "0.75rem 1rem",
@@ -166,17 +158,12 @@ export function CricketScoreCard() {
                       <Text size="md">{target === "B" ? "Bull" : target}</Text>
                     </Tooltip>
                   </td>
-                  {state.players.map((player, playerIndex) => (
+                  {state.players.map((player) => (
                     <td key={player.id}>
                       <NumberInput
                         value={player.cricketScores?.[target] ?? null}
                         onChange={(value) =>
-                          handleScoreChange(
-                            player.id,
-                            roundIndex,
-                            playerIndex,
-                            value
-                          )
+                          handleScoreChange(player.id, roundIndex, value)
                         }
                         min={0}
                         max={9}
@@ -266,7 +253,7 @@ export function CricketScoreCard() {
       >
         <Stack>
           <Text>Are you sure you want to remove {playerToRemove?.name}?</Text>
-          <Group position="right">
+          <Group justify="flex-end">
             <Button variant="subtle" onClick={() => setPlayerToRemove(null)}>
               Cancel
             </Button>

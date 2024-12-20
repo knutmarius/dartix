@@ -6,7 +6,6 @@ import {
   Popover,
   Stack,
   Switch,
-  useMantineColorScheme,
   Select,
   Text,
 } from "@mantine/core";
@@ -14,14 +13,25 @@ import { IconSettings, IconSun, IconMoon } from "@tabler/icons-react";
 import { Logo } from "./Logo";
 import { useState } from "react";
 import { useGame } from "../context/GameContext";
+import { GameMode } from "../types/game";
 
-export function AppBar() {
+interface AppBarProps {
+  onToggleTheme: () => void;
+  isDark: boolean;
+}
+
+export function AppBar({ onToggleTheme, isDark }: AppBarProps) {
   const [opened, setOpened] = useState(false);
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const { state, dispatch } = useGame();
 
+  const handleGameModeChange = (value: GameMode | null) => {
+    if (value) {
+      dispatch({ type: "SET_GAME_MODE", payload: value });
+    }
+  };
+
   return (
-    <AppShell.Header height={60}>
+    <AppShell.Header>
       <Container fluid style={{ height: "100%" }}>
         <div style={{ position: "relative", height: "100%" }}>
           <Group justify="center" align="center" style={{ height: "100%" }}>
@@ -58,9 +68,7 @@ export function AppBar() {
                     </Text>
                     <Select
                       value={state.gameMode}
-                      onChange={(value) =>
-                        dispatch({ type: "SET_GAME_MODE", payload: value })
-                      }
+                      onChange={handleGameModeChange}
                       data={[
                         { value: "halfit", label: "Half-It" },
                         { value: "cricket", label: "Cricket" },
@@ -71,8 +79,8 @@ export function AppBar() {
                   <Group gap="sm">
                     <IconSun size="1.2rem" />
                     <Switch
-                      checked={colorScheme === "dark"}
-                      onChange={() => toggleColorScheme()}
+                      checked={isDark}
+                      onChange={onToggleTheme}
                       size="md"
                     />
                     <IconMoon size="1.2rem" />

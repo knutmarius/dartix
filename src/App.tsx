@@ -5,7 +5,6 @@ import {
   createTheme,
   Stack,
   ColorSchemeScript,
-  ColorScheme,
 } from "@mantine/core";
 import { PlayerRegistration } from "./components/PlayerRegistration";
 import { ScoreCard } from "./components/ScoreCard";
@@ -13,7 +12,9 @@ import { CricketScoreCard } from "./components/CricketScoreCard";
 import { FiveHundredOneScoreCard } from "./components/FiveHundredOneScoreCard";
 import { GameProvider, useGame } from "./context/GameContext";
 import { AppBar } from "./components/AppBar";
-import "@fontsource/inter";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
 import { useState } from "react";
 
 const theme = createTheme({
@@ -54,25 +55,25 @@ function GameContent() {
 }
 
 export default function App() {
-  const [colorScheme, setColorScheme] = useState<ColorScheme>("light");
-
-  const toggleColorScheme = (value?: ColorScheme) => {
-    const nextColorScheme =
-      value || (colorScheme === "dark" ? "light" : "dark");
-    setColorScheme(nextColorScheme);
-  };
+  const [isDark, setIsDark] = useState(false);
 
   return (
     <>
       <ColorSchemeScript />
       <MantineProvider
-        theme={{ ...theme, colorScheme }}
+        theme={{
+          ...theme,
+          colorScheme: isDark ? "dark" : "light",
+        }}
         defaultColorScheme="light"
       >
         <GameProvider>
           <AppShell header={{ height: 60 }} padding="md">
             <AppShell.Header>
-              <AppBar />
+              <AppBar
+                onToggleTheme={() => setIsDark((d) => !d)}
+                isDark={isDark}
+              />
             </AppShell.Header>
 
             <AppShell.Main>
