@@ -1,50 +1,103 @@
-# React + TypeScript + Vite
+# DartiX 🎯
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive dart scoring application built with React and TypeScript. Keep track of your dart games with multiple game modes, real-time scoring, and a beautiful user interface.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Multiple Game Modes**
 
-## Expanding the ESLint configuration
+  - **Half-It**: Progress through numbers 13-20, doubles, triples, and bullseye. Miss a target and your score is halved!
+  - **Cricket**: Close out numbers 15-20 and bullseye while scoring points against your opponents
+  - **501**: Classic dart game - start at 501 and aim to reach exactly zero
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Smart Features**
 
-- Configure the top-level `parserOptions` property like this:
+  - Real-time score calculation
+  - Dynamic round management for 501
+  - Checkout suggestions for 501
+  - Helpful tooltips for scoring rules
+  - Player management with confirmation dialogs
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **Modern UI**
+  - Clean, responsive design
+  - Dark mode support
+  - Mobile-friendly interface
+  - Beautiful animations and transitions
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## 🛠️ Tech Stack
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- **Frontend Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **UI Framework**: Mantine UI
+- **Icons**: Tabler Icons
+- **Styling**: CSS-in-JS with Mantine
+- **State Management**: React Context
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm, yarn, or pnpm
+
+### Installation
+
+1. Clone the repository
+
+   ```bash
+   git clone https://github.com/yourusername/dartix.git
+   cd dartix
+   ```
+
+2. Install dependencies
+
+   ```bash
+   npm install
+   # or
+   yarn
+   # or
+   pnpm install
+   ```
+
+3. Start the development server
+
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:5173`
+
+## 🎮 Game Rules
+
+### Half-It
+
+1. Players take turns throwing at specific targets in sequence
+2. Each round targets a specific number (13-20), doubles, triples, or bullseye
+3. Missing a target completely (scoring 0) halves your current total score
+4. The player with the highest score at the end wins
+
+### Cricket
+
+1. Players aim to "close out" numbers 15-20 and bullseye
+2. Three marks on a number closes it (single = 1 mark, double = 2 marks, triple = 3 marks)
+3. Score points on a number only if you've closed it and others haven't
+4. First player to close all numbers with the highest score wins
+
+### 501
+
+1. Each player starts with 501 points
+2. Subtract points scored from your total
+3. Must reach exactly zero to win
+4. Optional double-out rule (not implemented yet)
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to submit issues and pull requests.
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
