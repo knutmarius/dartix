@@ -1,0 +1,116 @@
+name: Deploy
+
+# Build, test and ship to Azure App Service.
+#
+# Authentication is OIDC — GitHub mints a short-lived token that Azure trusts
+# for this repository and this branch only. There is no publish profile and no
+# long-lived credential stored anywhere. The three AZURE_* values are
+# identifiers, not secrets; the trust comes from the federated credential.
+#
+# The three runtime secrets (MONGODB_URI, APP_PASSCODE, SESSION_SECRET) are App
+# Settings on the web app. They are deliberately NOT repository secrets — CI has
+# no reason to see the database password.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write # required to request the OIDC token
+
+env:
+  AZURE_WEBAPP_NAME: dartix2
+  NODE_VERSION: 22.x
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://dartix2.azurewebsites.net
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      # The rules suite is the gate. If the halving or a multiplier is wrong,
+      # nothing should reach a database holding a decade of games.
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Stage the deployment
+        run: |
+          set -euo pipefail
+          npm prune --omit=dev
+
+          rm -rf deploy
+          mkdir -p deploy/packages/core deploy/packages/api deploy/packages/web
+
+          # The startup command is `node packages/api/dist/server.js`, and the
+          # API locates the built SPA at `../../web/dist` relative to its own
+          # compiled files — so the packages/* layout has to be preserved.
+          cp package.json deploy/
+          cp packages/core/package.json deploy/packages/core/
+          cp -R packages/core/dist       deploy/packages/core/dist
+          cp packages/api/package.json   deploy/packages/api/
+          cp -R packages/api/dist        deploy/packages/api/dist
+          cp -R packages/web/dist        deploy/packages/web/dist
+          cp -R node_modules             deploy/node_modules
+
+          # npm links workspace packages into node_modules as symlinks, which
+          # do not survive the deployment zip. Replace the link with a real copy
+          # so `import '@dartix/core'` still resolves on the server.
+          rm -rf deploy/node_modules/@dartix
+          mkdir -p deploy/node_modules/@dartix
+          cp -R deploy/packages/core deploy/node_modules/@dartix/core
+
+          test -f deploy/packages/api/dist/server.js
+          test -f deploy/packages/web/dist/index.html
+          test -f deploy/node_modules/@dartix/core/dist/index.js
+          echo "staged $(du -sh deploy | cut -f1)"
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: deploy
+
+      # F1 has no Always On, so the first request after a deploy cold-starts
+      # the container. Retry rather than fail on the first slow response.
+      - name: Smoke test
+        run: |
+          set -uo pipefail
+          URL="https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/api/health"
+          for i in $(seq 1 20); do
+            BODY=$(curl -fsS --max-time 30 "$URL" 2>/dev/null) && {
+              echo "$BODY"
+              echo "$BODY" | grep -q '"ok":true' && { echo "healthy after ${i} attempt(s)"; exit 0; }
+            }
+            echo "attempt $i: not ready yet"
+            sleep 15
+          done
+          echo "::error::health check never returned ok"
+          exit 1
