@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #101114; color: #f3f4f6;
+           font-family: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+           font-size: 14px; -webkit-font-smoothing: antialiased; }
+    a { color: #f5871f; text-decoration: none; }
+    a:hover { color: #ffa347; }
+    .dsp { font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+           font-variant-numeric: tabular-nums; }
+    .num { font-variant-numeric: tabular-nums; }
+    .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.09em;
+           text-transform: uppercase; color: #626a77; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; min-height: 900px; background: #101114; display: flex; flex-direction: column;">
+
+  <div style="height: 60px; flex-shrink: 0; border-bottom: 1px solid #22262d; display: flex; align-items: center; padding: 0 34px; gap: 32px;">
+    <div class="dsp" style="font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">
+      DARTI<span style="color: #f5871f;">X</span>
+    </div>
+    <div style="display: flex; gap: 4px;">
+      <div class="lbl" style="padding: 7px 14px; border-radius: 5px; background: #20242c; color: #f3f4f6;">Play</div>
+      <div class="lbl" style="padding: 7px 14px; border-radius: 5px;">Stats</div>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div class="lbl" style="color: #626a77;">Half-it · 12 rounds</div>
+  </div>
+
+  <div style="display: flex; gap: 22px; padding: 34px; flex-grow: 1; align-items: stretch;">
+
+    <!-- start -->
+    <div style="flex-grow: 1; background: #181a20; border: 1px solid #2b3038; border-radius: 14px; padding: 40px; display: flex; flex-direction: column;">
+      <div class="lbl" style="color: #f5871f;">Half-it</div>
+      <div class="dsp" style="font-size: 66px; font-weight: 700; line-height: 0.98; margin-top: 14px; letter-spacing: -0.005em;">
+        Twelve rounds.<br>One blank and<br>you lose half.
+      </div>
+      <div style="max-width: 470px; font-size: 15px; color: #9aa2ae; line-height: 1.55; margin-top: 20px;">
+        Work through the board in order. Score in a round and it adds up; miss it
+        entirely and your whole total is halved, rounded up. The 41 is where most
+        evenings are decided.
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 32px; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 13px; padding: 17px 30px; background: #f5871f; border-radius: 10px;">
+          <span class="dsp" style="font-size: 21px; font-weight: 700; color: #101114;">New game</span>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101114" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="M12 5l7 7-7 7"></path></svg>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 17px 22px; border: 1px solid #2b3038; border-radius: 10px;">
+          <span class="dsp" style="font-size: 17px; font-weight: 600; color: #9aa2ae;">Rules</span>
+        </div>
+      </div>
+
+      <div style="flex-grow: 1;"></div>
+
+      <!-- the round order, as a standing reminder -->
+      <div style="margin-top: 40px;">
+        <div class="lbl" style="margin-bottom: 11px;">The order, always the same</div>
+        <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 7px;">
+          <div style="height: 54px; border: 1px solid #2b3038; border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
+            <span class="dsp" style="font-size: 19px; font-weight: 600;">13</span>
+          </div>
+          <div style="height: 54px; border: 1px solid #2b3038; border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
+            <span class="dsp" style="font-size: 19px; font-weight: 600;">14</span>
+          </div>
+          <div style="height: 54px; border: 1px solid rgba(245,135,31,0.45); background: rgba(245,135,31,0.08); border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;">
+            <span class="dsp" style="font-size: 19px; font-weight: 700; color: #f5871f;">D</span>
+            <span class="lbl" style="font-size: 9px; letter-spacing: 0.05em; color: #f5871f;">doubles</span>
+          </div>
+          <div style="height: 54px; border: 1px solid #2b3038; border-radius: 7px; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 19px; font-weight: 600;">15</span>
+          </div>
+          <div style="height: 54px; border: 1px solid #2b3038; border-radius: 7px; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 19px; font-weight: 600;">16</span>
+          </div>
+          <div style="height: 54px; border: 1px solid rgba(245,135,31,0.45); background: rgba(245,135,31,0.08); border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;">
+            <span class="dsp" style="font-size: 19px; font-weight: 700; color: #f5871f;">T</span>
+            <span class="lbl" style="font-size: 9px; letter-spacing: 0.05em; color: #f5871f;">trebles</span>
+          </div>
+          <div style="height: 54px; border: 1px solid #2b3038; border-radius: 7px; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 19px; font-weight: 600;">17</span>
+          </div>
+          <div style="height: 54px; border: 1px solid #2b3038; border-radius: 7px; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 19px; font-weight: 600;">18</span>
+          </div>
+          <div style="height: 54px; border: 1px solid rgba(242,85,90,0.5); background: rgba(242,85,90,0.10); border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;">
+            <span class="dsp" style="font-size: 19px; font-weight: 700; color: #f2555a;">41</span>
+            <span class="lbl" style="font-size: 9px; letter-spacing: 0.05em; color: #f2555a;">exact</span>
+          </div>
+          <div style="height: 54px; border: 1px solid #2b3038; border-radius: 7px; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 19px; font-weight: 600;">19</span>
+          </div>
+          <div style="height: 54px; border: 1px solid #2b3038; border-radius: 7px; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 19px; font-weight: 600;">20</span>
+          </div>
+          <div style="height: 54px; border: 1px solid rgba(245,135,31,0.45); background: rgba(245,135,31,0.08); border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;">
+            <span class="dsp" style="font-size: 19px; font-weight: 700; color: #f5871f;">B</span>
+            <span class="lbl" style="font-size: 9px; letter-spacing: 0.05em; color: #f5871f;">bull</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- right column -->
+    <div style="width: 430px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px;">
+
+      <!-- resume -->
+      <div style="background: rgba(245,135,31,0.07); border: 1px solid rgba(245,135,31,0.42); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div style="width: 7px; height: 7px; border-radius: 4px; background: #f5871f;"></div>
+          <span class="lbl" style="color: #f5871f;">Game in progress</span>
+          <div style="flex-grow: 1;"></div>
+          <span class="lbl">Started 20:14</span>
+        </div>
+
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <span class="dsp" style="font-size: 30px; font-weight: 700; line-height: 1;">Round 9</span>
+          <span class="dsp" style="font-size: 17px; font-weight: 600; color: #9aa2ae;">of 12 — the 41</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 7px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="dsp" style="font-size: 17px; font-weight: 600; width: 74px;">Marit</span>
+            <div style="flex-grow: 1; height: 7px; background: #20242c; border-radius: 4px; overflow: hidden;">
+              <div style="width: 100%; height: 7px; background: #f5871f;"></div>
+            </div>
+            <span class="dsp num" style="font-size: 19px; font-weight: 700; width: 42px; text-align: right; color: #f5871f;">346</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="dsp" style="font-size: 17px; font-weight: 600; width: 74px;">Knut</span>
+            <div style="flex-grow: 1; height: 7px; background: #20242c; border-radius: 4px; overflow: hidden;">
+              <div style="width: 99%; height: 7px; background: #52596a;"></div>
+            </div>
+            <span class="dsp num" style="font-size: 19px; font-weight: 700; width: 42px; text-align: right;">343</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="dsp" style="font-size: 17px; font-weight: 600; width: 74px;">Øyvind</span>
+            <div style="flex-grow: 1; height: 7px; background: #20242c; border-radius: 4px; overflow: hidden;">
+              <div style="width: 55%; height: 7px; background: #52596a;"></div>
+            </div>
+            <span class="dsp num" style="font-size: 19px; font-weight: 700; width: 42px; text-align: right;">190</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 9px;">
+          <div style="flex-grow: 2; padding: 13px; background: #f5871f; border-radius: 8px; text-align: center;">
+            <span class="lbl" style="color: #101114; font-size: 12px;">Resume</span>
+          </div>
+          <div style="flex-grow: 1; padding: 13px; border: 1px solid #2b3038; border-radius: 8px; text-align: center;">
+            <span class="lbl" style="color: #9aa2ae;">Discard</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- recent -->
+      <div style="flex-grow: 1; background: #181a20; border: 1px solid #2b3038; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 4px;">
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+          <span class="lbl">Recent games</span>
+          <div style="flex-grow: 1;"></div>
+          <span class="lbl" style="color: #f5871f;">All history</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid #22262d;">
+          <div style="display: flex; flex-direction: column; gap: 1px; width: 66px;">
+            <span class="dsp num" style="font-size: 16px; font-weight: 600;">28 Aug</span>
+            <span class="lbl" style="font-size: 10px;">21:40</span>
+          </div>
+          <div style="width: 26px; height: 26px; border-radius: 6px; background: rgba(245,135,31,0.16); display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 13px; font-weight: 700; color: #f5871f;">K</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0;">
+            <span class="dsp" style="font-size: 17px; font-weight: 600;">Knut</span>
+            <span class="lbl" style="font-size: 10px;">4 players</span>
+          </div>
+          <div style="flex-grow: 1;"></div>
+          <span class="dsp num" style="font-size: 24px; font-weight: 700;">472</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid #22262d;">
+          <div style="display: flex; flex-direction: column; gap: 1px; width: 66px;">
+            <span class="dsp num" style="font-size: 16px; font-weight: 600;">21 Aug</span>
+            <span class="lbl" style="font-size: 10px;">20:55</span>
+          </div>
+          <div style="width: 26px; height: 26px; border-radius: 6px; background: #20242c; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 13px; font-weight: 700; color: #9aa2ae;">M</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0;">
+            <span class="dsp" style="font-size: 17px; font-weight: 600;">Marit</span>
+            <span class="lbl" style="font-size: 10px;">3 players</span>
+          </div>
+          <div style="flex-grow: 1;"></div>
+          <span class="dsp num" style="font-size: 24px; font-weight: 700;">518</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid #22262d;">
+          <div style="display: flex; flex-direction: column; gap: 1px; width: 66px;">
+            <span class="dsp num" style="font-size: 16px; font-weight: 600;">14 Aug</span>
+            <span class="lbl" style="font-size: 10px;">21:12</span>
+          </div>
+          <div style="width: 26px; height: 26px; border-radius: 6px; background: #20242c; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 13px; font-weight: 700; color: #9aa2ae;">Ø</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0;">
+            <span class="dsp" style="font-size: 17px; font-weight: 600;">Øyvind</span>
+            <span class="lbl" style="font-size: 10px;">5 players</span>
+          </div>
+          <div style="flex-grow: 1;"></div>
+          <span class="dsp num" style="font-size: 24px; font-weight: 700;">401</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid #22262d;">
+          <div style="display: flex; flex-direction: column; gap: 1px; width: 66px;">
+            <span class="dsp num" style="font-size: 16px; font-weight: 600;">7 Aug</span>
+            <span class="lbl" style="font-size: 10px;">20:30</span>
+          </div>
+          <div style="width: 26px; height: 26px; border-radius: 6px; background: #20242c; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 13px; font-weight: 700; color: #9aa2ae;">K</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0;">
+            <span class="dsp" style="font-size: 17px; font-weight: 600;">Knut</span>
+            <span class="lbl" style="font-size: 10px;">3 players</span>
+          </div>
+          <div style="flex-grow: 1;"></div>
+          <span class="dsp num" style="font-size: 24px; font-weight: 700;">389</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0;">
+          <div style="display: flex; flex-direction: column; gap: 1px; width: 66px;">
+            <span class="dsp num" style="font-size: 16px; font-weight: 600;">31 Jul</span>
+            <span class="lbl" style="font-size: 10px;">22:05</span>
+          </div>
+          <div style="width: 26px; height: 26px; border-radius: 6px; background: #20242c; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 13px; font-weight: 700; color: #9aa2ae;">H</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0;">
+            <span class="dsp" style="font-size: 17px; font-weight: 600;">Håkon</span>
+            <span class="lbl" style="font-size: 10px;">4 players</span>
+          </div>
+          <div style="flex-grow: 1;"></div>
+          <span class="dsp num" style="font-size: 24px; font-weight: 700;">443</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

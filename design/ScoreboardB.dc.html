@@ -1,0 +1,485 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #101114; color: #f3f4f6;
+           font-family: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+           font-size: 14px; -webkit-font-smoothing: antialiased; }
+    a { color: #f5871f; text-decoration: none; }
+    a:hover { color: #ffa347; }
+    .dsp { font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+           font-variant-numeric: tabular-nums; }
+    .num { font-variant-numeric: tabular-nums; }
+    .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.09em;
+           text-transform: uppercase; color: #626a77; }
+    button { font-family: inherit; cursor: pointer; border: 0; background: none;
+             color: inherit; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; min-height: 900px; background: #101114; display: flex; flex-direction: column;">
+
+  <div style="height: 60px; flex-shrink: 0; border-bottom: 1px solid #22262d; display: flex; align-items: center; padding: 0 32px; gap: 32px;">
+    <div class="dsp" style="font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">
+      DARTI<span style="color: #f5871f;">X</span>
+    </div>
+    <div style="display: flex; gap: 4px;">
+      <div class="lbl" style="padding: 7px 14px; border-radius: 5px; background: #20242c; color: #f3f4f6;">Play</div>
+      <div class="lbl" style="padding: 7px 14px; border-radius: 5px;">Stats</div>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div class="lbl" style="padding: 7px 13px; border: 1px solid #2b3038; border-radius: 5px; color: #9aa2ae;">Round {{roundNo}} of 12</div>
+    <div class="lbl" style="padding: 7px 13px; border: 1px solid #2b3038; border-radius: 5px; color: #9aa2ae;">Pause</div>
+  </div>
+
+  <div style="display: flex; gap: 20px; padding: 20px 32px 24px 32px; align-items: stretch; flex-grow: 1;">
+
+    <!-- board: rounds down, players across -->
+    <div style="flex-grow: 1; display: flex; flex-direction: column;">
+
+      <!-- player header -->
+      <div style="display: flex; align-items: flex-end; gap: 8px; height: 52px;">
+        <div style="width: 92px; flex-shrink: 0;" class="lbl">Round</div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+          <sc-for list="{{cols}}" as="col" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 3px;">
+              <div style="{{col.avatarStyle}}">
+                <span class="dsp" style="font-size: 15px; font-weight: 700;">{{col.initial}}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 1px;">
+                <span class="dsp" style="{{col.nameStyle}}">{{col.name}}</span>
+                <span class="lbl" style="{{col.tagStyle}}">{{col.tag}}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- round rows -->
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <sc-for list="{{rows}}" as="row" hint-placeholder-count="12">
+          <div style="{{row.rowStyle}}">
+            <div style="width: 92px; flex-shrink: 0; display: flex; align-items: center; gap: 9px; padding-left: 11px;">
+              <span class="dsp" style="{{row.labelStyle}}">{{row.label}}</span>
+              <span class="lbl" style="{{row.nameStyle}}">{{row.name}}</span>
+            </div>
+            <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+              <sc-for list="{{row.cells}}" as="cell" hint-placeholder-count="3">
+                <div style="{{cell.wrapStyle}}">
+                  <span class="dsp" style="{{cell.textStyle}}">{{cell.text}}</span>
+                  <div style="flex-grow: 1;"></div>
+                  <span class="dsp num" style="{{cell.runStyle}}">{{cell.runText}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- totals -->
+      <div style="display: flex; align-items: stretch; height: 76px; margin-top: 10px; border-top: 1px solid #2b3038; padding-top: 10px;">
+        <div style="width: 92px; flex-shrink: 0; display: flex; align-items: center; padding-left: 11px;" class="lbl">Total</div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+          <sc-for list="{{cols}}" as="col" hint-placeholder-count="3">
+            <div style="{{col.totalWrapStyle}}">
+              <span class="dsp" style="{{col.totalStyle}}">{{col.total}}</span>
+              <span class="lbl" style="{{col.gapStyle}}">{{col.gapText}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- right rail -->
+    <div style="width: 428px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 11px;">
+          <div style="width: 40px; height: 40px; border-radius: 8px; background: #f5871f; display: flex; align-items: center; justify-content: center; color: #101114;">
+            <span class="dsp" style="font-size: 19px; font-weight: 700;">{{turn.initial}}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div class="lbl" style="color: #f5871f;">Now throwing</div>
+            <div class="dsp" style="font-size: 24px; font-weight: 700; line-height: 1;">{{turn.name}}</div>
+          </div>
+          <div style="flex-grow: 1;"></div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <span class="lbl">{{turn.roundName}}</span>
+            <span class="dsp" style="font-size: 26px; font-weight: 700; color: #f5871f; line-height: 1;">{{turn.roundLabel}}</span>
+          </div>
+        </div>
+        <div style="font-size: 13px; color: #9aa2ae; line-height: 1.45;">{{turn.instruction}}</div>
+        <div style="background: #101114; border: 1px solid #2b3038; border-radius: 8px; overflow: hidden;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; padding: 11px 13px 9px 13px;">
+            <span class="lbl">On the board</span>
+            <span class="dsp num" style="font-size: 26px; font-weight: 700; line-height: 1;">{{turn.total}}</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 9px 13px; background: rgba(242,85,90,0.13); border-top: 1px solid rgba(242,85,90,0.25);">
+            <span class="lbl" style="color: #f2555a;">Miss &rarr; halved</span>
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <span class="dsp num" style="font-size: 22px; font-weight: 700; color: #f2555a; line-height: 1;">{{turn.missTo}}</span>
+              <span class="dsp num" style="font-size: 13px; font-weight: 600; color: #f2555a;">{{turn.missDelta}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- pad -->
+      <div style="flex-grow: 1; background: #181a20; border: 1px solid #2b3038; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="lbl">{{pad.title}}</div>
+          <div style="height: 1px; flex-grow: 1; background: #22262d;"></div>
+          <button onClick="{{onUndo}}" style="display: flex; align-items: center; gap: 6px; padding: 5px 11px; border: 1px solid #2b3038; border-radius: 5px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa2ae" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M3.5 13a9 9 0 1 0 2.6-6.4L3 9"></path></svg>
+            <span class="lbl" style="color: #9aa2ae;">Undo</span>
+          </button>
+        </div>
+
+        <sc-if value="{{pad.isCount}}" hint-placeholder-val="{{false}}">
+          <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px;">
+            <sc-for list="{{pad.chips}}" as="chip" hint-placeholder-count="10">
+              <button onClick="{{chip.pick}}" style="{{chip.style}}">
+                <span class="dsp" style="{{chip.labelStyle}}">{{chip.label}}</span>
+                <span class="lbl num" style="{{chip.subStyle}}">{{chip.sub}}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{pad.isSum}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px;">
+              <sc-for list="{{pad.segments}}" as="seg" hint-placeholder-count="20">
+                <button onClick="{{seg.pick}}" style="{{seg.style}}">
+                  <span class="dsp" style="font-size: 17px; font-weight: 600;">{{seg.label}}</span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: stretch;">
+              <div style="flex-grow: 1; background: #101114; border: 1px solid #2b3038; border-radius: 8px; padding: 9px 13px; display: flex; align-items: baseline; gap: 9px;">
+                <span class="lbl">{{pad.draftLabel}}</span>
+                <div style="flex-grow: 1;"></div>
+                <span class="dsp num" style="font-size: 26px; font-weight: 700; line-height: 1;">{{pad.draft}}</span>
+                <span class="dsp num" style="font-size: 14px; font-weight: 600; color: #f5871f;">{{pad.draftPts}}</span>
+              </div>
+              <button onClick="{{pad.clear}}" style="width: 74px; border: 1px solid #2b3038; border-radius: 7px;">
+                <span class="lbl" style="color: #9aa2ae;">Clear</span>
+              </button>
+              <button onClick="{{pad.commit}}" style="width: 90px; background: #f5871f; border-radius: 7px;">
+                <span class="lbl" style="color: #101114;">Enter</span>
+              </button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{pad.isBinary}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; gap: 12px; flex-grow: 1;">
+            <button onClick="{{pad.hit}}" style="flex-grow: 1; background: rgba(62,214,139,0.12); border: 1px solid rgba(62,214,139,0.45); border-radius: 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 104px;">
+              <span class="dsp" style="font-size: 30px; font-weight: 700; color: #3ed68b; line-height: 1;">HIT</span>
+              <span class="lbl num" style="color: #3ed68b;">{{pad.hitSub}}</span>
+            </button>
+            <button onClick="{{pad.miss}}" style="flex-grow: 1; background: rgba(242,85,90,0.12); border: 1px solid rgba(242,85,90,0.45); border-radius: 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 104px;">
+              <span class="dsp" style="font-size: 30px; font-weight: 700; color: #f2555a; line-height: 1;">MISS</span>
+              <span class="lbl num" style="color: #f2555a;">{{pad.missSub}}</span>
+            </button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{pad.isBull}}" hint-placeholder-val="{{false}}">
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;">
+            <sc-for list="{{pad.chips}}" as="chip" hint-placeholder-count="7">
+              <button onClick="{{chip.pick}}" style="{{chip.style}}">
+                <span class="dsp" style="{{chip.labelStyle}}">{{chip.label}}</span>
+                <span class="lbl num" style="{{chip.subStyle}}">{{chip.sub}}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{pad.isComplete}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1; justify-content: center;">
+            <div class="dsp" style="font-size: 24px; font-weight: 700;">All twelve rounds in.</div>
+            <div style="font-size: 13px; color: #9aa2ae;">{{pad.winnerLine}}</div>
+            <div style="padding: 13px 26px; background: #f5871f; border-radius: 8px; text-align: center;">
+              <span class="lbl" style="color: #101114; font-size: 12px;">See summary</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="flex-grow: 1;"></div>
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+          <sc-for list="{{keys}}" as="k" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <span class="dsp" style="min-width: 24px; padding: 3px 6px; text-align: center; border: 1px solid #2b3038; border-bottom-width: 2px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #9aa2ae;">{{k.key}}</span>
+              <span style="font-size: 12px; color: #626a77;">{{k.what}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":900},"showRunning":{"editor":"boolean","default":true,"section":"Board"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inputs: {
+        knut:   { '13': 2, '14': 3, 'D': 20, '15': 2, '16': 1, 'T': 20, '17': 2, '18': 3, '41': 1 },
+        oyvind: { '13': 3, '14': 1, 'D': 18, '15': 0, '16': 2, 'T': 20, '17': 1, '18': 2 },
+        marit:  { '13': 3, '14': 3, 'D': 20, '15': 2, '16': 3, 'T': 20, '17': 3, '18': 2 }
+      },
+      cursor: 25,
+      draft: 0,
+      history: []
+    };
+  }
+
+  rounds() {
+    return [
+      { k: '13', label: '13', kind: 'count', mult: 13, name: 'Thirteens', instr: 'How many 13s did the three darts land? A treble counts three, a double two.' },
+      { k: '14', label: '14', kind: 'count', mult: 14, name: 'Fourteens', instr: 'How many 14s did the three darts land? A treble counts three, a double two.' },
+      { k: 'D',  label: 'D',  kind: 'sum',   mult: 2,  name: 'Doubles',   instr: 'Tap every number you hit as a double. The pad adds them up and doubles the total.' },
+      { k: '15', label: '15', kind: 'count', mult: 15, name: 'Fifteens',  instr: 'How many 15s did the three darts land? A treble counts three, a double two.' },
+      { k: '16', label: '16', kind: 'count', mult: 16, name: 'Sixteens',  instr: 'How many 16s did the three darts land? A treble counts three, a double two.' },
+      { k: 'T',  label: 'T',  kind: 'sum',   mult: 3,  name: 'Triples',   instr: 'Tap every number you hit as a treble. The pad adds them up and trebles the total.' },
+      { k: '17', label: '17', kind: 'count', mult: 17, name: 'Seventeens', instr: 'How many 17s did the three darts land? A treble counts three, a double two.' },
+      { k: '18', label: '18', kind: 'count', mult: 18, name: 'Eighteens', instr: 'How many 18s did the three darts land? A treble counts three, a double two.' },
+      { k: '41', label: '41', kind: 'binary', mult: 41, name: 'The 41',   instr: 'Three darts totalling exactly 41. All or nothing — and a miss halves everything above.' },
+      { k: '19', label: '19', kind: 'count', mult: 19, name: 'Nineteens', instr: 'How many 19s did the three darts land? A treble counts three, a double two.' },
+      { k: '20', label: '20', kind: 'count', mult: 20, name: 'Twenties',  instr: 'How many 20s did the three darts land? A treble counts three, a double two.' },
+      { k: 'B',  label: 'B',  kind: 'bull',  mult: 25, name: 'Bull',      instr: 'Count the bull units. Outer bull is one, bullseye is two.' }
+    ];
+  }
+
+  players() {
+    return [
+      { id: 'knut',   name: 'Knut',   initial: 'K' },
+      { id: 'oyvind', name: 'Øyvind', initial: 'Ø' },
+      { id: 'marit',  name: 'Marit',  initial: 'M' }
+    ];
+  }
+
+  walk(pid) {
+    var rounds = this.rounds();
+    var inp = this.state.inputs[pid] || {};
+    var total = 0;
+    var cells = [];
+    for (var i = 0; i < rounds.length; i++) {
+      var r = rounds[i];
+      var v = inp[r.k];
+      if (v === undefined || v === null) { cells.push({ entered: false }); continue; }
+      var pts = v * r.mult;
+      var before = total;
+      total = pts > 0 ? total + pts : Math.ceil(total / 2);
+      cells.push({ entered: true, raw: v, pts: pts, before: before, after: total,
+                   halved: pts === 0, delta: total - before });
+    }
+    return { cells: cells, total: total };
+  }
+
+  commit(v) {
+    var rounds = this.rounds();
+    var players = this.players();
+    var n = players.length;
+    var c = this.state.cursor;
+    if (c >= rounds.length * n) return;
+    var r = rounds[Math.floor(c / n)];
+    var p = players[c % n];
+    var next = JSON.parse(JSON.stringify(this.state.inputs));
+    if (!next[p.id]) next[p.id] = {};
+    next[p.id][r.k] = v;
+    this.setState({
+      inputs: next, cursor: c + 1, draft: 0,
+      history: this.state.history.concat([{ cursor: c, pid: p.id, rk: r.k, prev: (this.state.inputs[p.id] || {})[r.k] }])
+    });
+  }
+
+  undo() {
+    var h = this.state.history;
+    if (!h.length) return;
+    var last = h[h.length - 1];
+    var next = JSON.parse(JSON.stringify(this.state.inputs));
+    if (last.prev === undefined) { delete next[last.pid][last.rk]; }
+    else { next[last.pid][last.rk] = last.prev; }
+    this.setState({ inputs: next, cursor: last.cursor, draft: 0, history: h.slice(0, -1) });
+  }
+
+  renderVals() {
+    var self = this;
+    var rounds = this.rounds();
+    var players = this.players();
+    var n = players.length;
+    var showRunning = this.props.showRunning ?? true;
+
+    var cursor = this.state.cursor;
+    var complete = cursor >= rounds.length * n;
+    var rIdx = complete ? rounds.length - 1 : Math.floor(cursor / n);
+    var pIdx = complete ? n - 1 : cursor % n;
+    var round = rounds[rIdx];
+    var active = players[pIdx];
+
+    var walks = {};
+    players.forEach(function (p) { walks[p.id] = self.walk(p.id); });
+    var ordered = players.slice().sort(function (a, b) { return walks[b.id].total - walks[a.id].total; });
+    var rankOf = {};
+    ordered.forEach(function (p, i) { rankOf[p.id] = i + 1; });
+    var lead = walks[ordered[0].id].total;
+
+    var cols = players.map(function (p, pi) {
+      var wk = walks[p.id];
+      var isThrowing = !complete && pi === pIdx;
+      var isLeader = rankOf[p.id] === 1;
+      var behind = lead - wk.total;
+      return {
+        name: p.name, initial: p.initial,
+        avatarStyle: 'width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; '
+          + 'justify-content: center; flex-shrink: 0; '
+          + (isThrowing ? 'background: #f5871f; color: #101114;' : 'background: #20242c; color: #9aa2ae;'),
+        nameStyle: 'font-size: 19px; font-weight: 600; line-height: 1; '
+          + (isThrowing ? 'color: #f3f4f6;' : 'color: #d4d8de;'),
+        tag: isThrowing ? 'Throwing' : (isLeader ? 'Leading' : ''),
+        tagStyle: 'letter-spacing: 0.11em; ' + (isThrowing ? 'color: #f5871f;' : 'color: #626a77;'),
+        total: String(wk.total),
+        totalWrapStyle: 'display: flex; flex-direction: column; align-items: center; justify-content: center; '
+          + 'border-radius: 8px; '
+          + (isLeader ? 'background: rgba(245,135,31,0.10); box-shadow: inset 0 0 0 1px rgba(245,135,31,0.4);'
+                      : 'background: #181a20; border: 1px solid #22262d;'),
+        totalStyle: 'font-size: 36px; font-weight: 700; line-height: 1; '
+          + (isLeader ? 'color: #f5871f;' : 'color: #f3f4f6;'),
+        gapText: isLeader ? 'Leading' : '–' + behind,
+        gapStyle: 'margin-top: 2px; ' + (isLeader ? 'color: #f5871f;' : 'color: #626a77;')
+      };
+    });
+
+    var rows = rounds.map(function (r, ri) {
+      var isNow = !complete && ri === rIdx;
+      var isPast = ri < rIdx;
+      var rowStyle = 'display: flex; align-items: stretch; height: 40px; border-radius: 7px; '
+        + (isNow ? 'background: rgba(245,135,31,0.09); box-shadow: inset 2px 0 0 #f5871f;'
+                 : (isPast ? 'background: #181a20;' : 'background: #15171c;'));
+
+      var cells = players.map(function (p, pi) {
+        var c = walks[p.id].cells[ri];
+        var isActiveCell = !complete && ri === rIdx && pi === pIdx;
+        var wrap = 'display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 6px; ';
+        if (isActiveCell) {
+          wrap += 'background: rgba(245,135,31,0.16); box-shadow: inset 0 0 0 2px #f5871f;';
+        } else {
+          wrap += 'background: rgba(255,255,255,0.02);';
+        }
+        var text, textStyle;
+        if (isActiveCell) {
+          text = '–'; textStyle = 'font-size: 20px; font-weight: 700; color: #f5871f;';
+        } else if (!c.entered) {
+          text = '·'; textStyle = 'font-size: 17px; font-weight: 600; color: #363c46;';
+        } else if (c.halved) {
+          text = '0'; textStyle = 'font-size: 20px; font-weight: 700; color: #f2555a;';
+        } else {
+          text = String(c.pts); textStyle = 'font-size: 20px; font-weight: 600; color: #f3f4f6;';
+        }
+        var runText = '', runStyle = 'font-size: 13px; font-weight: 600; color: #626a77;';
+        if (showRunning && c.entered) {
+          runText = c.halved ? (String(c.before) + ' → ' + String(c.after)) : String(c.after);
+          if (c.halved) runStyle = 'font-size: 13px; font-weight: 600; color: #f2555a;';
+        }
+        return { text: text, textStyle: textStyle, wrapStyle: wrap, runText: runText, runStyle: runStyle };
+      });
+
+      return {
+        label: r.label, name: r.name.substring(0, 3),
+        labelStyle: 'font-size: 19px; font-weight: 700; min-width: 22px; '
+          + (isNow ? 'color: #f5871f;' : (isPast ? 'color: #9aa2ae;' : 'color: #626a77;')),
+        nameStyle: isNow ? 'color: #f5871f;' : '',
+        rowStyle: rowStyle,
+        cells: cells
+      };
+    });
+
+    var wk = walks[active.id];
+    var missTo = Math.ceil(wk.total / 2);
+    var pad = {
+      title: complete ? 'Game complete' : round.name + ' · ' + active.name,
+      isCount: !complete && round.kind === 'count',
+      isSum: !complete && round.kind === 'sum',
+      isBinary: !complete && round.kind === 'binary',
+      isBull: !complete && round.kind === 'bull',
+      isComplete: complete,
+      winnerLine: complete ? (ordered[0].name + ' takes it on ' + walks[ordered[0].id].total + '.') : '',
+      hitSub: '+41 → ' + (wk.total + 41),
+      missSub: '→ ' + missTo,
+      hit: function () { self.commit(1); },
+      miss: function () { self.commit(0); },
+      draft: String(this.state.draft),
+      draftLabel: round.k === 'D' ? 'Doubles total' : 'Trebles total',
+      draftPts: '= ' + (this.state.draft * round.mult) + ' pts',
+      clear: function () { self.setState({ draft: 0 }); },
+      commit: function () { self.commit(self.state.draft); }
+    };
+
+    var chipCount = round.kind === 'bull' ? 7 : 10;
+    pad.chips = [];
+    for (var i = 0; i < chipCount; i++) {
+      (function (v) {
+        var zero = v === 0;
+        pad.chips.push({
+          label: String(v),
+          sub: zero ? 'halve' : String(v * round.mult),
+          style: 'height: 62px; border-radius: 8px; display: flex; flex-direction: column; '
+            + 'align-items: center; justify-content: center; gap: 1px; '
+            + (zero ? 'background: rgba(242,85,90,0.12); border: 1px solid rgba(242,85,90,0.45);'
+                    : 'background: #20242c; border: 1px solid #2b3038;'),
+          labelStyle: 'font-size: 24px; font-weight: 700; line-height: 1; '
+            + (zero ? 'color: #f2555a;' : 'color: #f3f4f6;'),
+          subStyle: 'letter-spacing: 0.04em; ' + (zero ? 'color: #f2555a;' : 'color: #626a77;'),
+          pick: function () { self.commit(v); }
+        });
+      })(i);
+    }
+
+    pad.segments = [];
+    for (var s = 1; s <= 20; s++) {
+      (function (v) {
+        pad.segments.push({
+          label: String(v),
+          style: 'height: 38px; border-radius: 6px; background: #20242c; border: 1px solid #2b3038;',
+          pick: function () { self.setState({ draft: self.state.draft + v }); }
+        });
+      })(s);
+    }
+
+    return {
+      roundNo: complete ? 12 : rIdx + 1,
+      cols: cols,
+      rows: rows,
+      turn: {
+        name: active.name, initial: active.initial,
+        roundName: round.name, roundLabel: round.label,
+        instruction: round.instr,
+        total: String(wk.total),
+        missTo: String(missTo),
+        missDelta: '(' + (missTo - wk.total) + ')'
+      },
+      pad: pad,
+      onUndo: function () { self.undo(); },
+      keys: [
+        { key: '0-9', what: 'enter' },
+        { key: '↵', what: 'commit' },
+        { key: '↑ ↓', what: 'move' },
+        { key: '⌘Z', what: 'undo' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

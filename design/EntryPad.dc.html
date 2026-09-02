@@ -1,0 +1,301 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #101114; color: #f3f4f6;
+           font-family: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+           font-size: 14px; -webkit-font-smoothing: antialiased; }
+    a { color: #f5871f; text-decoration: none; }
+    a:hover { color: #ffa347; }
+    .dsp { font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+           font-variant-numeric: tabular-nums; }
+    .num { font-variant-numeric: tabular-nums; }
+    .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.09em;
+           text-transform: uppercase; color: #626a77; }
+    button { font-family: inherit; cursor: pointer; border: 0; background: none;
+             color: inherit; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; min-height: 880px; background: #101114; padding: 34px 34px 40px 34px; box-sizing: border-box; display: flex; flex-direction: column; gap: 26px;">
+
+  <div style="display: flex; align-items: flex-end; gap: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="lbl">Entry pad</div>
+      <div class="dsp" style="font-size: 34px; font-weight: 700; line-height: 1;">Four rounds, four pads</div>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div style="max-width: 460px; font-size: 13px; color: #9aa2ae; line-height: 1.5;">
+      The pad swaps with the round type, so the same keystroke always means the
+      obvious thing. Every mode also takes bare digits from the keyboard and
+      advances on its own — the mouse is the fallback, not the path.
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px;">
+
+    <!-- count -->
+    <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 11px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 8px; background: #20242c; border: 1px solid #2b3038; display: flex; align-items: center; justify-content: center;">
+          <span class="dsp" style="font-size: 18px; font-weight: 700; color: #f5871f;">20</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px;">
+          <div class="dsp" style="font-size: 20px; font-weight: 600; line-height: 1.1;">Number rounds</div>
+          <div class="lbl">13 · 14 · 15 · 16 · 17 · 18 · 19 · 20</div>
+        </div>
+      </div>
+      <div style="font-size: 13px; color: #9aa2ae; line-height: 1.45;">
+        Count the segments, not the darts. A treble counts three, a double two —
+        so three darts can put nine on the board.
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px;">
+        <sc-for list="{{countChips}}" as="chip" hint-placeholder-count="10">
+          <button onClick="{{chip.pick}}" style="{{chip.style}}">
+            <span class="dsp" style="{{chip.labelStyle}}">{{chip.label}}</span>
+            <span class="lbl num" style="{{chip.subStyle}}">{{chip.sub}}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="{{countOut.style}}">
+        <span class="lbl" style="{{countOut.labelStyle}}">{{countOut.label}}</span>
+        <div style="flex-grow: 1;"></div>
+        <span class="dsp num" style="{{countOut.valueStyle}}">{{countOut.value}}</span>
+      </div>
+    </div>
+
+    <!-- sum: doubles / triples -->
+    <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 11px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 8px; background: #20242c; border: 1px solid #2b3038; display: flex; align-items: center; justify-content: center;">
+          <span class="dsp" style="font-size: 18px; font-weight: 700; color: #f5871f;">{{sumMode}}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px;">
+          <div class="dsp" style="font-size: 20px; font-weight: 600; line-height: 1.1;">{{sumTitle}}</div>
+          <div class="lbl">Sum of the faces you hit</div>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="display: flex; gap: 4px; padding: 3px; background: #101114; border: 1px solid #2b3038; border-radius: 7px;">
+          <button onClick="{{pickD}}" style="{{tabD}}"><span class="lbl" style="{{tabDLabel}}">Doubles</span></button>
+          <button onClick="{{pickT}}" style="{{tabT}}"><span class="lbl" style="{{tabTLabel}}">Triples</span></button>
+        </div>
+      </div>
+      <div style="font-size: 13px; color: #9aa2ae; line-height: 1.45;">
+        Tap each face you hit and the pad adds them up, then applies the
+        multiplier. The old app made you do that arithmetic in your head.
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px;">
+        <sc-for list="{{segments}}" as="seg" hint-placeholder-count="20">
+          <button onClick="{{seg.pick}}" style="{{seg.style}}">
+            <span class="dsp" style="font-size: 16px; font-weight: 600;">{{seg.label}}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: stretch;">
+        <div style="flex-grow: 1; background: #101114; border: 1px solid #2b3038; border-radius: 8px; padding: 10px 13px; display: flex; align-items: baseline; gap: 10px;">
+          <span class="lbl">{{sumPicked}}</span>
+          <div style="flex-grow: 1;"></div>
+          <span class="dsp num" style="font-size: 24px; font-weight: 700; line-height: 1;">{{sumDraft}}</span>
+          <span class="dsp num" style="font-size: 15px; font-weight: 700; color: #f5871f;">{{sumPts}}</span>
+        </div>
+        <button onClick="{{sumClear}}" style="width: 76px; border: 1px solid #2b3038; border-radius: 7px;">
+          <span class="lbl" style="color: #9aa2ae;">Clear</span>
+        </button>
+        <button onClick="{{sumCommit}}" style="width: 92px; background: #f5871f; border-radius: 7px;">
+          <span class="lbl" style="color: #101114;">Enter</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- the 41 -->
+    <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 11px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 8px; background: #20242c; border: 1px solid #2b3038; display: flex; align-items: center; justify-content: center;">
+          <span class="dsp" style="font-size: 18px; font-weight: 700; color: #f5871f;">41</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px;">
+          <div class="dsp" style="font-size: 20px; font-weight: 600; line-height: 1.1;">The 41</div>
+          <div class="lbl">All or nothing</div>
+        </div>
+      </div>
+      <div style="font-size: 13px; color: #9aa2ae; line-height: 1.45;">
+        Three darts totalling exactly 41. There is no partial credit, so there is
+        no reason to ask for a number — two buttons is the whole round.
+      </div>
+      <div style="display: flex; gap: 12px; flex-grow: 1;">
+        <button onClick="{{hit41}}" style="{{hitStyle}}">
+          <span class="dsp" style="font-size: 34px; font-weight: 700; color: #3ed68b; line-height: 1;">HIT</span>
+          <span class="lbl num" style="color: #3ed68b;">+41</span>
+          <span class="lbl" style="margin-top: 6px;">Key 1 &nbsp;/&nbsp; Y</span>
+        </button>
+        <button onClick="{{miss41}}" style="{{missStyle}}">
+          <span class="dsp" style="font-size: 34px; font-weight: 700; color: #f2555a; line-height: 1;">MISS</span>
+          <span class="lbl num" style="color: #f2555a;">halves your total</span>
+          <span class="lbl" style="margin-top: 6px;">Key 0 &nbsp;/&nbsp; N</span>
+        </button>
+      </div>
+      <div style="{{out41.style}}">
+        <span class="lbl" style="{{out41.labelStyle}}">{{out41.label}}</span>
+        <div style="flex-grow: 1;"></div>
+        <span class="dsp num" style="{{out41.valueStyle}}">{{out41.value}}</span>
+      </div>
+    </div>
+
+    <!-- bull -->
+    <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 11px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 8px; background: #20242c; border: 1px solid #2b3038; display: flex; align-items: center; justify-content: center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#2b3038" stroke-width="2"></circle><circle cx="12" cy="12" r="4.5" stroke="#f5871f" stroke-width="2"></circle><circle cx="12" cy="12" r="1.6" fill="#f5871f"></circle></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px;">
+          <div class="dsp" style="font-size: 20px; font-weight: 600; line-height: 1.1;">Bull</div>
+          <div class="lbl">The last round</div>
+        </div>
+      </div>
+      <div style="font-size: 13px; color: #9aa2ae; line-height: 1.45;">
+        Count bull units at 25 apiece: outer bull is one, bullseye is two. Three
+        darts, so six is the ceiling — the pad only offers what is reachable.
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px;">
+        <sc-for list="{{bullChips}}" as="chip" hint-placeholder-count="7">
+          <button onClick="{{chip.pick}}" style="{{chip.style}}">
+            <span class="dsp" style="{{chip.labelStyle}}">{{chip.label}}</span>
+            <span class="lbl num" style="{{chip.subStyle}}">{{chip.sub}}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="{{bullOut.style}}">
+        <span class="lbl" style="{{bullOut.labelStyle}}">{{bullOut.label}}</span>
+        <div style="flex-grow: 1;"></div>
+        <span class="dsp num" style="{{bullOut.valueStyle}}">{{bullOut.value}}</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":880}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { count: null, sumKind: 'D', sumDraft: 0, sumPicks: [], sumOut: null, r41: null, bull: null };
+  }
+
+  outBox(value, kind) {
+    var base = 'display: flex; align-items: baseline; border-radius: 8px; padding: 11px 14px; ';
+    if (value === null) {
+      return { style: base + 'background: #101114; border: 1px dashed #2b3038;',
+               label: 'Nothing entered yet', labelStyle: '',
+               value: '—', valueStyle: 'font-size: 22px; font-weight: 700; color: #363c46;' };
+    }
+    if (value === 0) {
+      return { style: base + 'background: rgba(242,85,90,0.13); border: 1px solid rgba(242,85,90,0.4);',
+               label: 'Blanked · total halves', labelStyle: 'color: #f2555a;',
+               value: '0', valueStyle: 'font-size: 22px; font-weight: 700; color: #f2555a;' };
+    }
+    return { style: base + 'background: rgba(62,214,139,0.10); border: 1px solid rgba(62,214,139,0.34);',
+             label: kind, labelStyle: 'color: #3ed68b;',
+             value: '+' + value, valueStyle: 'font-size: 22px; font-weight: 700; color: #3ed68b;' };
+  }
+
+  renderVals() {
+    var self = this;
+    var s = this.state;
+
+    var chip = function (v, pts, sub, size, onPick, selected) {
+      var zero = v === 0;
+      var bg, border, col;
+      if (selected) { bg = 'rgba(245,135,31,0.16)'; border = '#f5871f'; col = '#f5871f'; }
+      else if (zero) { bg = 'rgba(242,85,90,0.12)'; border = 'rgba(242,85,90,0.45)'; col = '#f2555a'; }
+      else { bg = '#20242c'; border = '#2b3038'; col = '#f3f4f6'; }
+      return {
+        label: String(v), sub: sub,
+        style: 'height: ' + size + 'px; border-radius: 8px; display: flex; flex-direction: column; '
+          + 'align-items: center; justify-content: center; gap: 1px; background: ' + bg
+          + '; border: 1px solid ' + border + ';',
+        labelStyle: 'font-size: 25px; font-weight: 700; line-height: 1; color: ' + col + ';',
+        subStyle: 'letter-spacing: 0.04em; color: ' + (zero || selected ? col : '#626a77') + ';',
+        pick: onPick
+      };
+    };
+
+    var countChips = [];
+    for (var i = 0; i <= 9; i++) {
+      (function (v) {
+        countChips.push(chip(v, v * 20, v === 0 ? 'halve' : String(v * 20), 62,
+          function () { self.setState({ count: v * 20 }); }, s.count === v * 20 && s.count !== null));
+      })(i);
+    }
+
+    var bullChips = [];
+    for (var b = 0; b <= 6; b++) {
+      (function (v) {
+        bullChips.push(chip(v, v * 25, v === 0 ? 'halve' : String(v * 25), 62,
+          function () { self.setState({ bull: v * 25 }); }, s.bull === v * 25 && s.bull !== null));
+      })(b);
+    }
+
+    var mult = s.sumKind === 'D' ? 2 : 3;
+    var segments = [];
+    for (var g = 1; g <= 20; g++) {
+      (function (v) {
+        var on = s.sumPicks.indexOf(v) !== -1;
+        segments.push({
+          label: String(v),
+          style: 'height: 38px; border-radius: 6px; '
+            + (on ? 'background: rgba(245,135,31,0.18); border: 1px solid #f5871f; color: #f5871f;'
+                  : 'background: #20242c; border: 1px solid #2b3038;'),
+          pick: function () {
+            self.setState({ sumDraft: self.state.sumDraft + v, sumPicks: self.state.sumPicks.concat([v]) });
+          }
+        });
+      })(g);
+    }
+
+    var tabOn = 'padding: 5px 12px; border-radius: 5px; background: #f5871f;';
+    var tabOff = 'padding: 5px 12px; border-radius: 5px;';
+
+    return {
+      countChips: countChips,
+      countOut: this.outBox(s.count, 'Twenties'),
+
+      sumMode: s.sumKind,
+      sumTitle: s.sumKind === 'D' ? 'Doubles' : 'Triples',
+      sumDraft: String(s.sumDraft),
+      sumPts: '= ' + (s.sumDraft * mult) + ' pts',
+      sumPicked: s.sumPicks.length ? s.sumPicks.join(' + ') : 'Tap the faces you hit',
+      segments: segments,
+      pickD: function () { self.setState({ sumKind: 'D', sumDraft: 0, sumPicks: [], sumOut: null }); },
+      pickT: function () { self.setState({ sumKind: 'T', sumDraft: 0, sumPicks: [], sumOut: null }); },
+      tabD: s.sumKind === 'D' ? tabOn : tabOff,
+      tabT: s.sumKind === 'T' ? tabOn : tabOff,
+      tabDLabel: s.sumKind === 'D' ? 'color: #101114;' : 'color: #9aa2ae;',
+      tabTLabel: s.sumKind === 'T' ? 'color: #101114;' : 'color: #9aa2ae;',
+      sumClear: function () { self.setState({ sumDraft: 0, sumPicks: [], sumOut: null }); },
+      sumCommit: function () { self.setState({ sumOut: self.state.sumDraft * mult }); },
+
+      hit41: function () { self.setState({ r41: 41 }); },
+      miss41: function () { self.setState({ r41: 0 }); },
+      hitStyle: 'flex-grow: 1; border-radius: 9px; display: flex; flex-direction: column; align-items: center; '
+        + 'justify-content: center; gap: 3px; min-height: 118px; background: rgba(62,214,139,0.12); border: '
+        + (s.r41 === 41 ? '2px solid #3ed68b;' : '1px solid rgba(62,214,139,0.45);'),
+      missStyle: 'flex-grow: 1; border-radius: 9px; display: flex; flex-direction: column; align-items: center; '
+        + 'justify-content: center; gap: 3px; min-height: 118px; background: rgba(242,85,90,0.12); border: '
+        + (s.r41 === 0 ? '2px solid #f2555a;' : '1px solid rgba(242,85,90,0.45);'),
+      out41: this.outBox(s.r41, 'Made the 41'),
+
+      bullChips: bullChips,
+      bullOut: this.outBox(s.bull, 'Bull')
+    };
+  }
+}
+</script>
+</body>
+</html>

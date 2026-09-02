@@ -1,0 +1,26 @@
+{
+  "name": "@dartix/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The Half-it rules and stats, shared by the API and the web app. No runtime dependencies.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.7"
+  }
+}

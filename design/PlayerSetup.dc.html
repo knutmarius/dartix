@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #101114; color: #f3f4f6;
+           font-family: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+           font-size: 14px; -webkit-font-smoothing: antialiased; }
+    a { color: #f5871f; text-decoration: none; }
+    a:hover { color: #ffa347; }
+    .dsp { font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+           font-variant-numeric: tabular-nums; }
+    .num { font-variant-numeric: tabular-nums; }
+    .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.09em;
+           text-transform: uppercase; color: #626a77; }
+    button { font-family: inherit; cursor: pointer; border: 0; background: none;
+             color: inherit; text-align: left; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; min-height: 900px; background: #101114; display: flex; flex-direction: column;">
+
+  <div style="height: 60px; flex-shrink: 0; border-bottom: 1px solid #22262d; display: flex; align-items: center; padding: 0 34px; gap: 32px;">
+    <div class="dsp" style="font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">
+      DARTI<span style="color: #f5871f;">X</span>
+    </div>
+    <div style="display: flex; gap: 4px;">
+      <div class="lbl" style="padding: 7px 14px; border-radius: 5px; background: #20242c; color: #f3f4f6;">Play</div>
+      <div class="lbl" style="padding: 7px 14px; border-radius: 5px;">Stats</div>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div class="lbl" style="padding: 7px 13px; border: 1px solid #2b3038; border-radius: 5px; color: #9aa2ae;">Manage players</div>
+  </div>
+
+  <div style="display: flex; gap: 22px; padding: 34px; flex-grow: 1; align-items: stretch;">
+
+    <!-- picker -->
+    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 22px;">
+      <div style="display: flex; align-items: flex-end; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div class="lbl">New game</div>
+          <div class="dsp" style="font-size: 42px; font-weight: 700; line-height: 1;">Who&#39;s throwing?</div>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="font-size: 13px; color: #626a77;">Tap to pick. Any number of players.</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+        <sc-for list="{{people}}" as="p" hint-placeholder-count="8">
+          <button onClick="{{p.toggle}}" style="{{p.style}}">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="{{p.avatarStyle}}">
+                <span class="dsp" style="font-size: 18px; font-weight: 700;">{{p.initial}}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 1px;">
+                <span class="dsp" style="{{p.nameStyle}}">{{p.name}}</span>
+                <span class="lbl" style="font-size: 10px;">{{p.meta}}</span>
+              </div>
+              <div style="flex-grow: 1;"></div>
+              <div style="{{p.tickStyle}}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#101114" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"></path></svg>
+              </div>
+            </div>
+          </button>
+        </sc-for>
+
+        <!-- inline add -->
+        <button onClick="{{openAdd}}" style="{{addTileStyle}}">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 38px; height: 38px; border-radius: 8px; border: 1px dashed #3a414d; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa2ae" stroke-width="2.3" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+              <span class="dsp" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">Add player</span>
+              <span class="lbl" style="font-size: 10px;">Right here, no detour</span>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <!-- add player, expanded -->
+      <sc-if value="{{adding}}" hint-placeholder-val="{{true}}">
+        <div style="background: #181a20; border: 1px solid rgba(245,135,31,0.42); border-radius: 11px; padding: 20px; display: flex; align-items: flex-end; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 7px; flex-grow: 1;">
+            <span class="lbl" style="color: #f5871f;">New player</span>
+            <div style="display: flex; align-items: center; gap: 11px; background: #101114; border: 1px solid #2b3038; border-radius: 8px; padding: 13px 15px;">
+              <span class="dsp" style="font-size: 21px; font-weight: 600; color: #f3f4f6;">{{typed}}</span>
+              <div style="width: 2px; height: 22px; background: #f5871f;"></div>
+              <div style="flex-grow: 1;"></div>
+              <span class="lbl">Enter to save</span>
+            </div>
+          </div>
+          <button onClick="{{cancelAdd}}" style="padding: 15px 20px; border: 1px solid #2b3038; border-radius: 8px;">
+            <span class="lbl" style="color: #9aa2ae;">Cancel</span>
+          </button>
+          <button onClick="{{saveAdd}}" style="padding: 15px 26px; background: #f5871f; border-radius: 8px;">
+            <span class="lbl" style="color: #101114;">Save &amp; select</span>
+          </button>
+        </div>
+      </sc-if>
+
+      <div style="flex-grow: 1;"></div>
+
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #626a77;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#626a77" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg>
+        Adding someone no longer means leaving this screen. The old app hid it
+        behind a Config tab, which meant re-picking everyone afterwards.
+      </div>
+    </div>
+
+    <!-- order + start -->
+    <div style="width: 396px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px;">
+
+      <div style="flex-grow: 1; background: #181a20; border: 1px solid #2b3038; border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: center;">
+          <span class="lbl">Throwing order</span>
+          <div style="flex-grow: 1;"></div>
+          <button onClick="{{reshuffle}}" style="display: flex; align-items: center; gap: 7px; padding: 5px 11px; border: 1px solid #2b3038; border-radius: 5px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa2ae" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"></path><path d="M4 20 21 3"></path><path d="M21 16v5h-5"></path><path d="M15 15l6 6"></path><path d="M4 4l5 5"></path></svg>
+            <span class="lbl" style="color: #9aa2ae;">Reshuffle</span>
+          </button>
+        </div>
+
+        <div style="font-size: 13px; color: #9aa2ae; line-height: 1.45;">
+          Randomised, and shown here because in turn mode it decides who actually
+          throws first.
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{order}}" as="o" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; gap: 13px; background: #101114; border: 1px solid #22262d; border-radius: 8px; padding: 12px 14px;">
+              <span class="dsp" style="font-size: 15px; font-weight: 700; color: #f5871f; width: 15px;">{{o.n}}</span>
+              <div style="width: 32px; height: 32px; border-radius: 7px; background: #20242c; display: flex; align-items: center; justify-content: center;">
+                <span class="dsp" style="font-size: 15px; font-weight: 700; color: #9aa2ae;">{{o.initial}}</span>
+              </div>
+              <span class="dsp" style="font-size: 19px; font-weight: 600;">{{o.name}}</span>
+              <div style="flex-grow: 1;"></div>
+              <span class="lbl" style="font-size: 10px;">{{o.meta}}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+          <div style="border: 1px dashed #2b3038; border-radius: 9px; padding: 26px; text-align: center;">
+            <span style="font-size: 13px; color: #626a77;">Pick at least one player.</span>
+          </div>
+        </sc-if>
+
+        <div style="flex-grow: 1;"></div>
+
+        <div style="display: flex; align-items: baseline; gap: 9px; padding-top: 4px;">
+          <span class="dsp num" style="font-size: 34px; font-weight: 700; color: #f5871f; line-height: 1;">{{count}}</span>
+          <span class="lbl">{{countWord}} selected</span>
+        </div>
+
+        <button onClick="{{noop}}" style="{{startStyle}}">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <span class="dsp" style="{{startLabelStyle}}">Start game</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{startArrow}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="M12 5l7 7-7 7"></path></svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selected: ['knut', 'oyvind', 'marit'],
+      order: ['knut', 'oyvind', 'marit'],
+      adding: true,
+      typed: 'Sindre'
+    };
+  }
+
+  pool() {
+    return [
+      { id: 'knut',   name: 'Knut',   initial: 'K', meta: '57 games · avg 341' },
+      { id: 'oyvind', name: 'Øyvind', initial: 'Ø', meta: '52 games · avg 318' },
+      { id: 'marit',  name: 'Marit',  initial: 'M', meta: '48 games · avg 327' },
+      { id: 'hakon',  name: 'Håkon',  initial: 'H', meta: '31 games · avg 296' },
+      { id: 'silje',  name: 'Silje',  initial: 'S', meta: '24 games · avg 311' },
+      { id: 'anders', name: 'Anders', initial: 'A', meta: '19 games · avg 282' },
+      { id: 'ingrid', name: 'Ingrid', initial: 'I', meta: '12 games · avg 305' },
+      { id: 'trond',  name: 'Trond',  initial: 'T', meta: '8 games · avg 268' }
+    ];
+  }
+
+  toggle(id) {
+    var sel = this.state.selected.slice();
+    var i = sel.indexOf(id);
+    if (i === -1) sel.push(id); else sel.splice(i, 1);
+    this.setState({ selected: sel, order: this.shuffle(sel) });
+  }
+
+  shuffle(list) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  renderVals() {
+    var self = this;
+    var sel = this.state.selected;
+    var pool = this.pool();
+
+    var people = pool.map(function (p) {
+      var on = sel.indexOf(p.id) !== -1;
+      return {
+        name: p.name, initial: p.initial, meta: p.meta,
+        style: 'border-radius: 11px; padding: 15px; '
+          + (on ? 'background: rgba(245,135,31,0.10); border: 1px solid #f5871f;'
+                : 'background: #181a20; border: 1px solid #2b3038;'),
+        avatarStyle: 'width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; '
+          + 'justify-content: center; flex-shrink: 0; '
+          + (on ? 'background: #f5871f; color: #101114;' : 'background: #20242c; color: #9aa2ae;'),
+        nameStyle: 'font-size: 19px; font-weight: 600; line-height: 1.1; '
+          + (on ? 'color: #f3f4f6;' : 'color: #d4d8de;'),
+        tickStyle: 'width: 21px; height: 21px; border-radius: 11px; flex-shrink: 0; display: flex; '
+          + 'align-items: center; justify-content: center; '
+          + (on ? 'background: #f5871f;' : 'background: transparent; border: 1px solid #2b3038;'),
+        toggle: function () { self.toggle(p.id); }
+      };
+    });
+
+    var byId = {};
+    pool.forEach(function (p) { byId[p.id] = p; });
+    var order = this.state.order.filter(function (id) { return sel.indexOf(id) !== -1; })
+      .map(function (id, i) {
+        return { n: i + 1, name: byId[id].name, initial: byId[id].initial,
+                 meta: i === 0 ? 'throws first' : '' };
+      });
+
+    var n = sel.length;
+    var can = n > 0;
+
+    return {
+      people: people,
+      order: order,
+      isEmpty: n === 0,
+      count: String(n),
+      countWord: n === 1 ? 'player' : 'players',
+      adding: this.state.adding,
+      typed: this.state.typed,
+      openAdd: function () { self.setState({ adding: true }); },
+      cancelAdd: function () { self.setState({ adding: false }); },
+      saveAdd: function () { self.setState({ adding: false }); },
+      reshuffle: function () { self.setState({ order: self.shuffle(self.state.selected) }); },
+      noop: function () {},
+      addTileStyle: 'border-radius: 11px; padding: 15px; background: transparent; border: 1px dashed #3a414d;',
+      startStyle: 'padding: 17px; border-radius: 10px; '
+        + (can ? 'background: #f5871f;' : 'background: #20242c; border: 1px solid #2b3038;'),
+      startLabelStyle: 'font-size: 21px; font-weight: 700; ' + (can ? 'color: #101114;' : 'color: #626a77;'),
+      startArrow: can ? '#101114' : '#626a77'
+    };
+  }
+}
+</script>
+</body>
+</html>

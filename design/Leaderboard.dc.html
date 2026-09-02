@@ -1,0 +1,355 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #101114; color: #f3f4f6;
+           font-family: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+           font-size: 14px; -webkit-font-smoothing: antialiased; }
+    a { color: #f5871f; text-decoration: none; }
+    a:hover { color: #ffa347; }
+    .dsp { font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+           font-variant-numeric: tabular-nums; }
+    .num { font-variant-numeric: tabular-nums; }
+    .hero { font-variant-numeric: proportional-nums; }
+    .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.09em;
+           text-transform: uppercase; color: #626a77; }
+    .cell { display: flex; align-items: center; justify-content: flex-end; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; min-height: 1000px; background: #101114; display: flex; flex-direction: column;">
+
+  <div style="height: 60px; flex-shrink: 0; border-bottom: 1px solid #22262d; display: flex; align-items: center; padding: 0 34px; gap: 32px;">
+    <div class="dsp" style="font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">
+      DARTI<span style="color: #f5871f;">X</span>
+    </div>
+    <div style="display: flex; gap: 4px;">
+      <div class="lbl" style="padding: 7px 14px; border-radius: 5px;">Play</div>
+      <div class="lbl" style="padding: 7px 14px; border-radius: 5px; background: #20242c; color: #f3f4f6;">Stats</div>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div class="lbl" style="color: #626a77;">84 games since 2011</div>
+  </div>
+
+  <!-- one filter row, above everything it scopes -->
+  <div style="padding: 22px 34px 0 34px; display: flex; align-items: center; gap: 18px;">
+    <div style="display: flex; gap: 3px; padding: 3px; background: #181a20; border: 1px solid #2b3038; border-radius: 8px;">
+      <div class="lbl" style="padding: 8px 15px; border-radius: 6px; background: #f5871f; color: #101114;">Leaderboard</div>
+      <div class="lbl" style="padding: 8px 15px; border-radius: 6px;">Player</div>
+      <div class="lbl" style="padding: 8px 15px; border-radius: 6px;">Compare</div>
+      <div class="lbl" style="padding: 8px 15px; border-radius: 6px;">Records</div>
+      <div class="lbl" style="padding: 8px 15px; border-radius: 6px;">History</div>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div style="display: flex; gap: 3px; padding: 3px; background: #181a20; border: 1px solid #2b3038; border-radius: 8px;">
+      <div class="lbl" style="padding: 8px 14px; border-radius: 6px; background: #20242c; color: #f3f4f6;">All time</div>
+      <div class="lbl" style="padding: 8px 14px; border-radius: 6px;">This month</div>
+      <div class="lbl" style="padding: 8px 14px; border-radius: 6px;">This week</div>
+      <div class="lbl" style="padding: 8px 14px; border-radius: 6px;">Custom</div>
+    </div>
+  </div>
+
+  <div style="padding: 22px 34px 34px 34px; display: flex; flex-direction: column; gap: 20px;">
+
+    <!-- stat tiles: the number IS the chart -->
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+      <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 11px; padding: 20px; display: flex; flex-direction: column; gap: 5px;">
+        <span class="lbl">Games played</span>
+        <span class="dsp hero" style="font-size: 44px; font-weight: 700; line-height: 1;">84</span>
+        <span style="font-size: 12px; color: #626a77;">6 of them this month</span>
+      </div>
+      <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 11px; padding: 20px; display: flex; flex-direction: column; gap: 5px;">
+        <span class="lbl">Average game</span>
+        <span class="dsp hero" style="font-size: 44px; font-weight: 700; line-height: 1;">323</span>
+        <span style="font-size: 12px; color: #626a77;">Across every player</span>
+      </div>
+      <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 11px; padding: 20px; display: flex; flex-direction: column; gap: 5px;">
+        <span class="lbl">Highest game ever</span>
+        <span class="dsp hero" style="font-size: 44px; font-weight: 700; line-height: 1; color: #f5871f;">518</span>
+        <span style="font-size: 12px; color: #626a77;">Marit, 21 August</span>
+      </div>
+      <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 11px; padding: 20px; display: flex; flex-direction: column; gap: 5px;">
+        <span class="lbl">Halvings per game</span>
+        <span class="dsp hero" style="font-size: 44px; font-weight: 700; line-height: 1; color: #f2555a;">1.4</span>
+        <span style="font-size: 12px; color: #626a77;">Most of them on the 41</span>
+      </div>
+    </div>
+
+    <!-- leaderboard -->
+    <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 12px; padding: 22px;">
+      <div style="display: flex; align-items: center; margin-bottom: 4px;">
+        <span class="lbl">Leaderboard</span>
+        <div style="flex-grow: 1;"></div>
+        <span style="font-size: 12px; color: #626a77;">Click any column to sort</span>
+      </div>
+
+      <!-- header -->
+      <div style="display: flex; align-items: center; height: 34px; border-bottom: 1px solid #2b3038;">
+        <div style="width: 250px; flex-shrink: 0;" class="lbl">Player</div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));">
+          <div class="lbl cell">Games</div>
+          <div class="lbl cell" style="color: #f5871f;">Avg &darr;</div>
+          <div class="lbl cell">High</div>
+          <div class="lbl cell">Low</div>
+          <div class="lbl cell">Wins</div>
+          <div class="lbl cell">Win %</div>
+          <div class="lbl cell">Halv / g</div>
+          <div class="lbl cell">Bull %</div>
+        </div>
+      </div>
+
+      <!-- rows -->
+      <div style="display: flex; align-items: center; height: 62px; border-bottom: 1px solid #22262d;">
+        <div style="width: 250px; flex-shrink: 0; display: flex; align-items: center; gap: 13px;">
+          <span class="dsp" style="width: 15px; font-size: 15px; font-weight: 700; color: #f5871f;">1</span>
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: rgba(217,89,38,0.20); display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 16px; font-weight: 700; color: #d95926;">Ø</span>
+          </div>
+          <span class="dsp" style="font-size: 22px; font-weight: 600;">Øyvind</span>
+        </div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));">
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">52</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 24px; font-weight: 700; color: #f5871f;">341</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">496</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">88</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">19</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">37%</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">1.1</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">64%</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; height: 62px; border-bottom: 1px solid #22262d;">
+        <div style="width: 250px; flex-shrink: 0; display: flex; align-items: center; gap: 13px;">
+          <span class="dsp" style="width: 15px; font-size: 15px; font-weight: 700; color: #626a77;">2</span>
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: rgba(57,135,229,0.20); display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 16px; font-weight: 700; color: #3987e5;">K</span>
+          </div>
+          <span class="dsp" style="font-size: 22px; font-weight: 600;">Knut</span>
+        </div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));">
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">57</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 24px; font-weight: 700;">338</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">472</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">96</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">21</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">37%</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">1.2</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">58%</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; height: 62px; border-bottom: 1px solid #22262d;">
+        <div style="width: 250px; flex-shrink: 0; display: flex; align-items: center; gap: 13px;">
+          <span class="dsp" style="width: 15px; font-size: 15px; font-weight: 700; color: #626a77;">3</span>
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: rgba(25,158,112,0.20); display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 16px; font-weight: 700; color: #199e70;">M</span>
+          </div>
+          <span class="dsp" style="font-size: 22px; font-weight: 600;">Marit</span>
+        </div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));">
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">48</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 24px; font-weight: 700;">327</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #f5871f;">518</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">74</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">16</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">33%</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">1.4</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #f5871f;">71%</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; height: 62px; border-bottom: 1px solid #22262d;">
+        <div style="width: 250px; flex-shrink: 0; display: flex; align-items: center; gap: 13px;">
+          <span class="dsp" style="width: 15px; font-size: 15px; font-weight: 700; color: #626a77;">4</span>
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: #20242c; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 16px; font-weight: 700; color: #9aa2ae;">S</span>
+          </div>
+          <span class="dsp" style="font-size: 22px; font-weight: 600;">Silje</span>
+        </div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));">
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">24</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 24px; font-weight: 700;">311</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">445</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">102</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">6</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">25%</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">1.5</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">55%</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; height: 62px;">
+        <div style="width: 250px; flex-shrink: 0; display: flex; align-items: center; gap: 13px;">
+          <span class="dsp" style="width: 15px; font-size: 15px; font-weight: 700; color: #626a77;">5</span>
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: #20242c; display: flex; align-items: center; justify-content: center;">
+            <span class="dsp" style="font-size: 16px; font-weight: 700; color: #9aa2ae;">H</span>
+          </div>
+          <span class="dsp" style="font-size: 22px; font-weight: 600;">Håkon</span>
+        </div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));">
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">31</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 24px; font-weight: 700;">296</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">431</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">68</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600;">7</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">23%</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #f2555a;">1.8</span></div>
+          <div class="cell"><span class="dsp num" style="font-size: 19px; font-weight: 600; color: #9aa2ae;">47%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- round heatmap -->
+    <div style="background: #181a20; border: 1px solid #2b3038; border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: flex-end; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 3px;">
+          <span class="lbl">Round heatmap</span>
+          <span class="dsp" style="font-size: 22px; font-weight: 600; line-height: 1;">Who owns which round</span>
+        </div>
+        <div style="max-width: 400px; font-size: 12px; color: #626a77; line-height: 1.45; padding-bottom: 2px;">
+          Average points, shaded within each round — so a bright cell means best in
+          the room at that target, not simply a big number.
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="display: flex; align-items: center; gap: 9px; padding-bottom: 3px;">
+          <span class="lbl" style="font-size: 10px;">Weakest</span>
+          <div style="display: flex; gap: 2px;">
+          <div style="width: 30px; height: 11px; background: #104281; border-radius: 2px;"></div>
+          <div style="width: 30px; height: 11px; background: #256abf; border-radius: 2px;"></div>
+          <div style="width: 30px; height: 11px; background: #3987e5; border-radius: 2px;"></div>
+          <div style="width: 30px; height: 11px; background: #6da7ec; border-radius: 2px;"></div>
+          <div style="width: 30px; height: 11px; background: #9ec5f4; border-radius: 2px;"></div>
+          </div>
+          <span class="lbl" style="font-size: 10px;">Strongest</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 74px; flex-shrink: 0;"></div>
+        <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px;">
+          <div class="lbl dsp" style="text-align: center;">13</div>
+          <div class="lbl dsp" style="text-align: center;">14</div>
+          <div class="lbl dsp" style="text-align: center; color: #f5871f;">D</div>
+          <div class="lbl dsp" style="text-align: center;">15</div>
+          <div class="lbl dsp" style="text-align: center;">16</div>
+          <div class="lbl dsp" style="text-align: center; color: #f5871f;">T</div>
+          <div class="lbl dsp" style="text-align: center;">17</div>
+          <div class="lbl dsp" style="text-align: center;">18</div>
+          <div class="lbl dsp" style="text-align: center; color: #f2555a;">41</div>
+          <div class="lbl dsp" style="text-align: center;">19</div>
+          <div class="lbl dsp" style="text-align: center;">20</div>
+          <div class="lbl dsp" style="text-align: center; color: #f5871f;">B</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="dsp" style="width: 74px; flex-shrink: 0; font-size: 18px; font-weight: 600; color: #d4d8de;">Øyvind</span>
+          <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px;">
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">21</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">27</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">31</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">29</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">31</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">49</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">33</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">36</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #3987e5;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">19</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">38</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">41</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">22</span></div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="dsp" style="width: 74px; flex-shrink: 0; font-size: 18px; font-weight: 600; color: #d4d8de;">Knut</span>
+          <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px;">
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">24</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">26</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">22</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">28</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">30</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">48</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">32</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">35</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">14</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">37</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">44</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">19</span></div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="dsp" style="width: 74px; flex-shrink: 0; font-size: 18px; font-weight: 600; color: #d4d8de;">Marit</span>
+          <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px;">
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">26</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #3987e5;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">24</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">36</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">27</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">29</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">41</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">30</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #3987e5;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">33</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">26</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">33</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">38</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">25</span></div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="dsp" style="width: 74px; flex-shrink: 0; font-size: 18px; font-weight: 600; color: #d4d8de;">Silje</span>
+          <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px;">
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #3987e5;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">23</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">20</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">33</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #3987e5;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">26</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">22</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">38</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">25</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">31</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #9ec5f4;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">24</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #6da7ec;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #101114;">35</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">36</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">20</span></div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="dsp" style="width: 74px; flex-shrink: 0; font-size: 18px; font-weight: 600; color: #d4d8de;">Håkon</span>
+          <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px;">
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">19</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">22</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #3987e5;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">28</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">24</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">25</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">40</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #256abf;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">27</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">29</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #3987e5;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">21</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">30</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">35</span></div>
+            <div style="height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #104281;"><span class="dsp num" style="font-size: 17px; font-weight: 600; color: #f3f4f6;">17</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #626a77;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#626a77" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg>
+        Marit takes the Doubles, the 41 and the Bull; Knut takes the 20s and dies on
+        the 41. That is a whole evening&#39;s tactics in one grid.
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

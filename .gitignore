@@ -1,0 +1,24 @@
+node_modules/
+dist/
+coverage/
+*.local
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# The legacy ASP.NET app is deliberately NOT in this repo.
+#
+# It stays on disk as reference but must never be committed: it carries a live
+# Atlas admin connection string (Code/StructureMap/Bootstrapper.cs), the old
+# HTTP Basic password (Global.asax.cs), a working Azure Web Deploy password
+# (Properties/PublishProfiles/DartiX.PublishSettings) and the subscription id,
+# plus 134MB of vendored NuGet packages.
+#
+# The rules it encoded are captured in packages/core, with file:line citations
+# back to the original in the comments.
+dartix-original/
+
+# The seeded design canvas is a 2.6MB generated artefact — the .dc.html
+# artboards and canvas.json in design/ are the sources worth keeping.
+design/dartix-scoring-app.html

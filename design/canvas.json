@@ -1,0 +1,56 @@
+{
+ "pages": [
+  { "id": "page-1", "name": "Play flow" },
+  { "id": "page-2", "name": "Stats" },
+  { "id": "page-3", "name": "Not chosen" }
+ ],
+ "artboards": [
+  { "file": "Home.dc.html",          "page": "page-1", "title": "Home",                        "x": 0,    "y": 0,    "w": 1440, "h": 960 },
+  { "file": "PlayerSetup.dc.html",   "page": "page-1", "title": "Player setup",                "x": 1560, "y": 0,    "w": 1440, "h": 960 },
+  { "file": "Main.dc.html",          "page": "page-1", "title": "Live scoreboard",             "x": 0,    "y": 1120, "w": 1440, "h": 980 },
+  { "file": "EntryPad.dc.html",      "page": "page-1", "title": "Entry pad — four modes",      "x": 1560, "y": 1120, "w": 1440, "h": 940 },
+  { "file": "Summary.dc.html",       "page": "page-1", "title": "Post-game summary",           "x": 0,    "y": 2260, "w": 1440, "h": 1030 },
+
+  { "file": "ScoreboardB.dc.html",   "page": "page-3", "title": "Scoreboard B — rounds as rows (not chosen)", "x": 0, "y": 0, "w": 1440, "h": 960 },
+
+  { "file": "Leaderboard.dc.html",   "page": "page-2", "title": "Leaderboard + round heatmap",  "x": 0,    "y": 0,    "w": 1440, "h": 1070 },
+  { "file": "PlayerProfile.dc.html", "page": "page-2", "title": "Player profile",              "x": 1560, "y": 0,    "w": 1440, "h": 1120 },
+  { "file": "HeadToHead.dc.html",    "page": "page-2", "title": "Head to head",                "x": 0,    "y": 1280, "w": 1440, "h": 980 },
+  { "file": "HallOfFame.dc.html",    "page": "page-2", "title": "Hall of fame",                "x": 1560, "y": 1280, "w": 1440, "h": 1060 }
+ ],
+ "annotations": [
+  {
+   "id": "brief",
+   "page": "page-1",
+   "x": 0,
+   "y": -300,
+   "w": 620,
+   "text": "DartiX 2.0 — Broadcast direction\n\nCharcoal ground, condensed numerals, one amber accent. Amber and red are STATUS colours (active turn, leader, halving) and never identify a player; the charts on the Stats page use a separate validated series palette so the two never get confused.\n\nThe scoreboard is live — click the pad and play it out."
+  },
+  {
+   "id": "ab-decided",
+   "page": "page-1",
+   "x": 1560,
+   "y": -300,
+   "w": 620,
+   "text": "Layout decided: A — players as rows, the twelve rounds across, pad below the board.\n\nReads like a live leaderboard, takes any number of players, and uses a laptop's width instead of its height.\n\nThe rejected B layout is on the \"Not chosen\" page. One idea worth stealing from it: B showed the running total inside every cell, which makes it obvious where a halving bit. Say the word and I'll fold that into A as a toggle."
+  },
+  {
+   "id": "pad-note",
+   "page": "page-1",
+   "x": 1560,
+   "y": 2110,
+   "w": 620,
+   "text": "The pad is the biggest win over the old app, which shipped a 20px number input and two abandoned on-screen keypads.\n\nNote the Doubles/Triples mode: tap the faces you hit and it does the arithmetic. The old app made you sum them in your head before typing."
+  },
+  {
+   "id": "stats-note",
+   "page": "page-2",
+   "x": 0,
+   "y": -260,
+   "w": 620,
+   "text": "The old Stats tab was three flat tables in an accordion plus one orange line chart.\n\nEvery number here is invented but internally consistent — the heatmap, the radar and the bleed chart all tell the same story about who owns which round. Swap in real data and the shapes will change; the layouts should not."
+  }
+ ],
+ "launch": { "view": "canvas", "page": "page-1" }
+}

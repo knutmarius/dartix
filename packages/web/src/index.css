@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+
+/*
+ * The Broadcast palette from the design canvas.
+ *
+ * Amber, red and green are STATUS colours — active turn, leader, halving,
+ * beat-your-average. They never identify a player. The three `series` colours
+ * do that, and they are a separate, validated set: the brand accent fails the
+ * contrast-vs-dark-surface lightness band as a series colour, which is why the
+ * chart orange is a step darker than the chrome orange.
+ */
+@theme {
+  --color-ground: #101114;
+  --color-surface: #181a20;
+  --color-raised: #20242c;
+  --color-line: #2b3038;
+  --color-line-soft: #22262d;
+
+  --color-ink: #f3f4f6;
+  --color-ink-2: #9aa2ae;
+  --color-ink-3: #626a77;
+  --color-ink-4: #363c46;
+
+  --color-accent: #4dabf7;
+  --color-accent-dim: #12466f;
+  --color-danger: #f2555a;
+  --color-good: #3ed68b;
+
+  --color-series-1: #d95926;
+  --color-series-2: #199e70;
+  --color-series-3: #c98500;
+
+  --font-sans: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-ground);
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Score tables align vertically, so tabular figures are right there.
+     Hero numbers do not, and equal-width digits make them look loose. */
+  .dsp {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+  }
+  .hero {
+    font-family: var(--font-display);
+    font-variant-numeric: proportional-nums;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@utility label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+/* Recharts paints its own surfaces; keep its tooltips on our palette. */
+.recharts-default-tooltip {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-line) !important;
+  border-radius: 8px !important;
+}

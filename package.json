@@ -1,0 +1,26 @@
+{
+  "name": "dartix",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Half-it dart scoring \u2014 React app, thin Node API, shared rules engine",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "npm run build && npm run start -w packages/api",
+    "dev": "npm run build -w packages/core && npm run dev:all",
+    "dev:all": "(npm run dev -w packages/api & npm run dev -w packages/web & wait)",
+    "dev:api": "npm run dev -w packages/api",
+    "dev:web": "npm run dev -w packages/web",
+    "verify": "npm run build -w packages/core && npm run verify:history -w packages/api",
+    "build": "npm run build -w packages/core && npm run build -w packages/api && npm run build -w packages/web",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run build -w packages/core && npm run typecheck --workspaces --if-present"
+  },
+  "overrides": {
+    "vite": "^6.4.3"
+  }
+}
