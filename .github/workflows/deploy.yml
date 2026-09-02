@@ -31,10 +31,11 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://dartix2.azurewebsites.net
 
+    # Deliberately no `environment:` block. Declaring one changes the OIDC
+    # subject to `...:environment:NAME`, which carries no branch — so on a
+    # public repo any branch permitted to use that environment could mint a
+    # deploy token. The ref-based subject binds it to main and nothing else.
     steps:
       - uses: actions/checkout@v4
 
