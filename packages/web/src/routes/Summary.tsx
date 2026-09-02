@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ROUNDS, rankPlayers, walk } from '@dartix/core';
 import { api } from '../api';
 import { hasGameInProgress, isFinished, useGame } from '../store/game';
+import { useCelebration } from '../lib/useCelebration';
 import { RunChart } from '../components/RunChart';
 import { Avatar, Button, Card, ErrorNote, Label, Stat, Warning } from '../components/ui';
 
@@ -13,6 +14,20 @@ export function Summary() {
   const game = useGame();
   const reset = useGame((s) => s.reset);
   const { players, inputs } = game;
+
+  const celebrate = useCelebration(game.muted);
+  const gameOver = hasGameInProgress(game) && isFinished(game);
+
+  /*
+   * Applause and confetti, once the twelve rounds are actually in.
+   *
+   * Gated on `gameOver` rather than firing on mount, because this route also
+   * renders for a moment when someone lands here with an unfinished game
+   * before the redirect below takes them back to the board.
+   */
+  useEffect(() => {
+    if (gameOver) return celebrate();
+  }, [gameOver, celebrate]);
 
   const save = useMutation({
     mutationFn: () =>
