@@ -7,6 +7,7 @@ import {
 import { useHistoricalAverages } from '../lib/useHistoricalAverages';
 import { useFailSound } from '../lib/useSound';
 import { Board } from '../components/Board';
+import { MobileBoard } from '../components/MobileBoard';
 import { EntryPad } from '../components/EntryPad';
 import { TurnCard } from '../components/TurnCard';
 import { Button, Label } from '../components/ui';
@@ -155,20 +156,58 @@ export function Play() {
   const playerIndex = players.findIndex((p) => p.id === player.id);
   const shownDraft = typed !== null ? Number(typed) : draft;
 
-  return (
-    <div className="flex min-h-[calc(100dvh-3.75rem)] flex-col">
-      <Board
-        players={players}
-        inputs={inputs}
-        activeRoundIndex={round.index}
-        activePlayerIndex={playerIndex}
-        averages={averages}
-        showTrend
-        onPick={(r, p) => { setTyped(null); moveTo(r, p); }}
-      />
+  const jumpTo = (r: number, p: number) => { setTyped(null); moveTo(r, p); };
 
-      <div className="flex flex-col gap-4 px-6 pt-6 lg:flex-row md:px-8">
-        <TurnCard playerName={player.name} round={round.round} total={total} />
+  return (
+    <div
+      className="flex h-[calc(100dvh-3.75rem)] flex-col overflow-hidden
+                 md:h-auto md:min-h-[calc(100dvh-3.75rem)] md:overflow-visible"
+    >
+      {/*
+        * Two boards, switched by CSS rather than by measuring the viewport.
+        * A media query has no hydration flicker and follows a rotation or a
+        * resized window for free. Both derive their totals from the same
+        * `walk`, so they cannot disagree about the score.
+        */}
+      <div className="flex min-h-0 grow flex-col md:hidden">
+        <MobileBoard
+          players={players}
+          inputs={inputs}
+          activeRoundIndex={round.index}
+          activePlayerIndex={playerIndex}
+          onPick={jumpTo}
+        />
+      </div>
+
+      <div className="hidden md:block">
+        <Board
+          players={players}
+          inputs={inputs}
+          activeRoundIndex={round.index}
+          activePlayerIndex={playerIndex}
+          averages={averages}
+          showTrend
+          onPick={jumpTo}
+        />
+      </div>
+
+      {/*
+        * On a phone this is the bottom of a fixed-height shell, so the pad is
+        * always in the thumb zone — it was previously a thousand pixels down
+        * the page. A sticky pad would have worked too, but it overlays the
+        * list it sits above, hiding the last player.
+        *
+        * The turn card is redundant here: the mobile board already carries the
+        * player, the total and the stakes. It returns from lg up.
+        */}
+      <div
+        className="flex shrink-0 flex-col gap-4 border-t border-line-soft bg-ground
+                   px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]
+                   md:border-0 md:px-8 md:pt-6 md:pb-0 lg:flex-row"
+      >
+        <div className="hidden lg:block">
+          <TurnCard playerName={player.name} round={round.round} total={total} />
+        </div>
         <EntryPad
           round={round.round}
           playerName={player.name}
@@ -182,7 +221,8 @@ export function Play() {
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-5 px-6 py-6 md:px-8">
+      {/* Keyboard shortcuts are noise on a device without a keyboard. */}
+      <div className="hidden flex-wrap items-center gap-5 px-6 py-6 md:flex md:px-8">
         {[
           ['0-9', 'enter and advance'],
           ['↵', 'commit'],

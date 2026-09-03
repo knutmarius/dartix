@@ -59,7 +59,7 @@ export function Chrome() {
         <Outlet />
       </main>
 
-      <footer className="px-6 py-8 md:px-8">
+      <footer className="hidden px-6 py-8 md:block md:px-8">
         <Label>DartiX — Half-it, since 2011</Label>
       </footer>
     </div>

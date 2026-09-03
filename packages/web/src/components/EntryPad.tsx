@@ -26,11 +26,11 @@ export function EntryPad(props: EntryPadProps) {
   const { round, playerName, onUndo, canUndo } = props;
 
   return (
-    <div className="flex grow flex-col gap-3.5 rounded-xl border border-line bg-surface p-5">
+    <div className="flex grow flex-col gap-2.5 rounded-xl border border-line bg-surface p-3 sm:gap-3.5 sm:p-5">
       <div className="flex items-center gap-3">
         <Label>{round.name} · {playerName}</Label>
         <div className="h-px grow bg-line-soft" />
-        <span className="text-xs text-ink-3">Type a digit, or click</span>
+        <span className="hidden text-xs text-ink-3 sm:inline">Type a digit, or click</span>
         <Button variant="default" disabled={!canUndo} onClick={onUndo} className="px-3! py-1.5!">
           Undo
         </Button>
@@ -51,13 +51,13 @@ function Chip({
   return (
     <button
       onClick={onPick}
-      className={`flex h-18 flex-col items-center justify-center gap-0.5 rounded-lg border transition-colors ${
+      className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg border transition-colors sm:h-18 ${
         blank
           ? 'border-danger/45 bg-danger/12 hover:bg-danger/20'
           : 'border-line bg-raised hover:border-ink-3'
       } ${wide ? 'col-span-2' : ''}`}
     >
-      <span className={`dsp text-[27px] leading-none font-bold ${blank ? 'text-danger' : ''}`}>
+      <span className={`dsp text-[22px] leading-none font-bold sm:text-[27px] ${blank ? 'text-danger' : ''}`}>
         {value}
       </span>
       <span className={`label num text-[10px]! tracking-normal! ${blank ? 'text-danger!' : ''}`}>
@@ -87,7 +87,7 @@ function BullPad({ round, onCommit }: EntryPadProps) {
           <Chip key={value} value={value} points={value * round.multiplier} onPick={() => onCommit(value)} />
         ))}
       </div>
-      <span className="text-xs text-ink-3">
+      <span className="hidden text-xs text-ink-3 sm:inline">
         Outer bull counts 1, bullseye counts 2. Three darts, so 6 is the ceiling.
       </span>
     </div>
@@ -105,19 +105,19 @@ function BinaryPad({ onCommit }: EntryPadProps) {
     <div className="flex grow gap-3">
       <button
         onClick={() => onCommit(1)}
-        className="flex grow flex-col items-center justify-center gap-1 rounded-xl border border-good/45 bg-good/12 py-6 transition-colors hover:bg-good/20"
+        className="flex grow flex-col items-center justify-center gap-1 rounded-xl border border-good/45 bg-good/12 py-4 transition-colors hover:bg-good/20 sm:py-6"
       >
         <span className="dsp text-3xl leading-none font-bold text-good">HIT</span>
         <span className="label num text-good!">+41</span>
-        <Label className="mt-1">Key 1 / Y</Label>
+        <Label className="mt-1 hidden sm:block">Key 1 / Y</Label>
       </button>
       <button
         onClick={() => onCommit(0)}
-        className="flex grow flex-col items-center justify-center gap-1 rounded-xl border border-danger/45 bg-danger/12 py-6 transition-colors hover:bg-danger/20"
+        className="flex grow flex-col items-center justify-center gap-1 rounded-xl border border-danger/45 bg-danger/12 py-4 transition-colors hover:bg-danger/20 sm:py-6"
       >
         <span className="dsp text-3xl leading-none font-bold text-danger">MISS</span>
         <span className="label text-danger!">halves your total</span>
-        <Label className="mt-1">Key 0 / N</Label>
+        <Label className="mt-1 hidden sm:block">Key 0 / N</Label>
       </button>
     </div>
   );
@@ -138,8 +138,9 @@ function SumPad({ round, draft, onAddFace, onClearDraft, onCommitDraft, onCommit
             key={face}
             onClick={() => onAddFace(face)}
             disabled={draft + face > round.maxInput}
-            className="dsp h-10 rounded-md border border-line bg-raised text-[17px] font-semibold
-                       transition-colors hover:border-ink-3 disabled:opacity-30 disabled:hover:border-line"
+            className="dsp h-9 rounded-md border border-line bg-raised text-[15px] font-semibold
+                       transition-colors hover:border-ink-3 disabled:opacity-30 disabled:hover:border-line
+                       sm:h-10 sm:text-[17px]"
           >
             {face}
           </button>
@@ -147,9 +148,14 @@ function SumPad({ round, draft, onAddFace, onClearDraft, onCommitDraft, onCommit
       </div>
 
       <div className="flex shrink-0 flex-col gap-2 lg:w-48">
-        <div className="flex grow flex-col items-center justify-center gap-0.5 rounded-lg border border-line bg-ground py-3">
-          <Label>{round.key === 'D' ? 'Doubles total' : 'Trebles total'}</Label>
-          <span className="dsp text-3xl leading-none font-bold">{draft}</span>
+        {/* Inline on a phone: stacked, this readout is the tallest element in
+            the tallest pad, and the height comes straight off the standings. */}
+        <div
+          className="flex grow items-center justify-center gap-2 rounded-lg border border-line
+                     bg-ground px-3 py-1.5 lg:flex-col lg:gap-0.5 lg:py-3"
+        >
+          <Label>{round.key === 'D' ? 'Doubles' : 'Trebles'}</Label>
+          <span className="dsp text-2xl leading-none font-bold lg:text-3xl">{draft}</span>
           <span className="dsp num text-[15px] font-semibold text-accent">
             = {draft * round.multiplier} pts
           </span>
