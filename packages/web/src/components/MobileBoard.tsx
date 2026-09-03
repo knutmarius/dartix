@@ -55,10 +55,18 @@ export function MobileBoard({
     <div className="flex min-h-0 grow flex-col">
       {/* Round, and how far through the game we are. Dots rather than twelve
           labels, which do not fit and are not the question being asked. */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-line-soft bg-[#14161b] px-4 py-2.5">
-        <div className="flex flex-col">
+      <div className="flex shrink-0 items-center gap-3 border-b border-line-soft bg-[#14161b] px-4 py-2">
+        {/* The target itself is what a glance is looking for — "14", not
+            "Fourteens" — so the number gets the accent block and the name
+            drops to a gloss beneath the round counter. */}
+        <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-accent">
+          <span className="dsp text-[28px] leading-none font-bold text-ground">{round.label}</span>
+        </div>
+        <div className="flex min-w-0 flex-col gap-0.5">
           <Label className="text-[10px]!">Round {activeRoundIndex + 1} of 12</Label>
-          <span className="dsp text-2xl leading-none font-bold text-accent">{round.name}</span>
+          <span className="dsp truncate text-lg leading-none font-semibold text-ink-2">
+            {round.name}
+          </span>
         </div>
         <div className="grow" />
         <div className="flex gap-1">

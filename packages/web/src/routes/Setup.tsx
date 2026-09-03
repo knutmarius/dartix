@@ -53,6 +53,8 @@ export function Setup() {
   }
 
   const throwingOrder = order.filter((id) => selected.includes(id));
+  /* Shown in the mobile start bar, where the order panel is off-screen. */
+  const firstThrower = throwingOrder[0] ? byId.get(throwingOrder[0])?.name : undefined;
 
   function begin() {
     const chosen = throwingOrder
@@ -228,10 +230,12 @@ export function Setup() {
             <Label>{selected.length === 1 ? 'player' : 'players'} selected</Label>
           </div>
 
+          {/* On a phone this lives in the pinned bar below instead, so it is
+              not stranded underneath a list of 38 players. */}
           <button
             onClick={begin}
             disabled={selected.length === 0}
-            className={`flex shrink-0 items-center justify-center gap-3 rounded-xl py-4 transition-colors ${
+            className={`hidden shrink-0 items-center justify-center gap-3 rounded-xl py-4 transition-colors md:flex ${
               selected.length === 0
                 ? 'cursor-not-allowed border border-line text-ink-3'
                 : 'bg-accent text-ground hover:bg-accent/90'
@@ -242,6 +246,45 @@ export function Setup() {
           </button>
         </Card>
       </aside>
+
+      {/*
+        * The mobile start bar.
+        *
+        * Picking players means scrolling a long list, and the action that ends
+        * that job was below all of it. Pinned to the bottom it is always one
+        * tap away, and it doubles as the running count so you can see what you
+        * have selected without scrolling back.
+        */}
+      <div
+        className="sticky bottom-0 z-30 -mx-6 -mb-6 flex items-center gap-3 border-t border-line-soft
+                   bg-ground/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]
+                   backdrop-blur md:hidden"
+      >
+        <div className="flex min-w-0 flex-col">
+          <div className="flex items-baseline gap-1.5">
+            <span className="hero text-2xl leading-none font-bold text-accent">{selected.length}</span>
+            <Label className="text-[10px]!">{selected.length === 1 ? 'player' : 'players'}</Label>
+          </div>
+          {firstThrower ? (
+            <span className="truncate text-[11px] text-ink-3">{firstThrower} throws first</span>
+          ) : (
+            <span className="text-[11px] text-ink-3">Tap to pick</span>
+          )}
+        </div>
+
+        <button
+          onClick={begin}
+          disabled={selected.length === 0}
+          className={`flex grow items-center justify-center gap-2.5 rounded-xl py-3.5 transition-colors ${
+            selected.length === 0
+              ? 'cursor-not-allowed border border-line text-ink-3'
+              : 'bg-accent text-ground'
+          }`}
+        >
+          <span className="dsp text-lg font-bold">Start game</span>
+          <Arrow />
+        </button>
+      </div>
     </div>
   );
 }

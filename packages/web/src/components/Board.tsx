@@ -49,9 +49,16 @@ export function Board({
       <div className="flex items-end gap-1 pb-2.5">
         <div className="flex w-56 shrink-0 flex-col gap-1 md:w-64">
           <Label>Round {activeRoundIndex + 1} of 12</Label>
-          <span className="dsp text-3xl leading-none font-bold text-accent">
-            {ROUNDS[activeRoundIndex]?.name}
-          </span>
+          {/* The target leads; the name is a gloss. Glancing up mid-throw, the
+              question is "which number", not "what is this round called". */}
+          <div className="flex items-baseline gap-2.5">
+            <span className="dsp text-4xl leading-none font-bold text-accent">
+              {ROUNDS[activeRoundIndex]?.label}
+            </span>
+            <span className="dsp truncate text-lg font-semibold text-ink-2">
+              {ROUNDS[activeRoundIndex]?.name}
+            </span>
+          </div>
         </div>
         <div className="grid grow grid-cols-12 items-end gap-1">
           {ROUNDS.map((round, index) => {
