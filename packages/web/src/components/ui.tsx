@@ -192,3 +192,13 @@ export function formatTime(iso: string | Date): string {
     hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo',
   }).format(date);
 }
+
+/**
+ * A round's name with a definite article, without doubling one it already has.
+ *
+ * `ROUNDS` names the ninth round "The 41", so the obvious `on the {name}`
+ * renders "on the The 41".
+ */
+export function theRound(name: string): string {
+  return name.startsWith('The ') ? `the ${name.slice(4)}` : `the ${name}`;
+}

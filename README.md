@@ -49,12 +49,26 @@ missing, or still holds its example value.
 npm install
 npm start        # build everything, serve on http://localhost:3000
 npm run dev      # hot reload: web on :5173, api on :3000
-npm test         # 117 rules and stats tests, no database needed
+npm test         # 132 rules and stats tests, no database needed
 npm run verify   # read-only audit of the live database (see below)
 ```
 
 `npm start` runs a single process: the API serves the built SPA from its own
 origin, which is why there is no CORS configuration anywhere.
+
+## Two passcodes
+
+`APP_PASSCODE` gives full access. `APP_PASSCODE_READONLY` is optional: set it
+and that passcode can see and do everything *except* write — no saving a game,
+no deleting one, no adding or removing players. Leave it unset and the role
+does not exist. The server refuses to start if the two are equal, since the
+full check wins and the read-only role would silently never apply.
+
+The role is carried inside the signed session cookie, and the boundary is
+`requireWrite` in the API. The web app also hides the buttons, but that is
+courtesy: a read-only session with devtools open still has to come through the
+middleware. It is not a boundary against people you distrust — read-only still
+exposes every game and every name, and both passcodes reach the same database.
 
 ## `npm run verify`
 
@@ -102,8 +116,8 @@ readability floor. See `packages/web/src/lib/palette.ts`.
 ## Secrets
 
 Nothing secret is in this repo. `packages/api/.env` is gitignored; only
-`.env.example` with placeholders is committed. In Azure the same three values
-live as App Settings.
+`.env.example` with placeholders is committed. In Azure the same values live
+as App Settings.
 
 The original ASP.NET app is **not** in this repo. It is kept locally as
 reference but carries a live Atlas admin connection string, the old HTTP Basic
@@ -113,5 +127,6 @@ its behaviour mattered, the comments in `packages/core` cite it by `file:line`.
 ## Deploying
 
 GitHub Actions builds and deploys to Azure App Service on every push to `main`.
-See `.github/workflows/deploy.yml`. The three environment values are App
-Settings on the web app, not repository secrets.
+See `.github/workflows/deploy.yml`. The environment values are App Settings on
+the web app, not repository secrets — CI has no reason to hold the database
+password.

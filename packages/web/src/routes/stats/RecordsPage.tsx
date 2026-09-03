@@ -26,6 +26,8 @@ export function RecordsPage() {
   if (r.topGames.length === 0) return <Empty>Nothing in this range yet.</Empty>;
 
   const best = r.topGames[0]!;
+  /* One entry per person, most recent first. */
+  const zeroClub = [...new Set(r.zeroGames.map((z) => z.playerName))];
 
   return (
     <div className="flex flex-col gap-5">
@@ -93,6 +95,40 @@ export function RecordsPage() {
               />
             ) : null}
           </div>
+
+          {/*
+            * Deliberately shown even when empty — "nobody has ever managed
+            * it" is the interesting fact most nights, and a card that only
+            * appeared once someone finally did it would give no sense of how
+            * hard it is.
+            *
+            * Names only, deduplicated: doing it twice does not make you twice
+            * a member, and the date of a nought is not the interesting part.
+            */}
+          <Card className={`flex flex-col gap-3 ${zeroClub.length > 0 ? 'border-danger/38! bg-danger/9!' : ''}`}>
+            <div className="flex items-center">
+              <Label className={zeroClub.length > 0 ? 'text-danger!' : ''}>
+                We&rsquo;re off to Mexico..
+              </Label>
+              <div className="grow" />
+              <span className="text-xs text-ink-3">Finished on nothing</span>
+            </div>
+
+            {zeroClub.length === 0 ? (
+              <p className="text-[13px] leading-relaxed text-ink-2">
+                <span className="dsp text-lg font-semibold text-ink">Nobody. Yet.</span>{' '}
+                Halving rounds up, so one point in the 13s is still a point twelve
+                rounds later — a total of nought means scoring in no round at all.
+              </p>
+            ) : (
+              <div className="flex items-baseline gap-4">
+                <span className="hero shrink-0 text-5xl leading-none font-bold text-danger">0</span>
+                <span className="dsp text-xl leading-snug font-semibold">
+                  {zeroClub.join(', ')}
+                </span>
+              </div>
+            )}
+          </Card>
         </div>
 
         <Card className="flex grow flex-col gap-0">
@@ -129,8 +165,10 @@ export function RecordsPage() {
             <div className="grow" />
             <span className="text-xs text-ink-3">Single round, all time</span>
           </div>
-          {[...r.bestRounds]
-            .sort((a, b) => b.points - a.points)
+          {/* Left in playing order — 13 first, the bull last. Sorting by score
+              just reproduces the multipliers, and it makes the row you are
+              looking for move around between date ranges. */}
+          {r.bestRounds
             .map((round) => {
               const names = round.holders.map((h) => h.playerName);
               const shown = names.slice(0, MAX_HOLDERS);

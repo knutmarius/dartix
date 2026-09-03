@@ -23,6 +23,13 @@ export const env = {
   get mongoUri(): string { return required('MONGODB_URI'); },
   get mongoDb(): string { return process.env['MONGODB_DB'] ?? 'DartiX'; },
   get passcode(): string { return required('APP_PASSCODE'); },
+  /**
+   * A second passcode granting everything except writes.
+   *
+   * Optional on purpose: unset means the feature is simply off, so a missing
+   * app setting can never lock anyone out of the real passcode.
+   */
+  get passcodeReadonly(): string | undefined { return process.env['APP_PASSCODE_READONLY'] || undefined; },
   get sessionSecret(): string { return required('SESSION_SECRET'); },
   get port(): number { return Number(process.env['PORT'] ?? 3000); },
   get production(): boolean { return process.env['NODE_ENV'] === 'production'; },
@@ -43,6 +50,14 @@ export function assertServerEnv(): void {
   }
   if (process.env['APP_PASSCODE'] === 'change-me' || process.env['SESSION_SECRET'] === 'change-me') {
     throw new Error('APP_PASSCODE and SESSION_SECRET still hold their example values.');
+  }
+  // Equal passcodes would silently hand every viewer full access, since the
+  // full check is the one that wins.
+  if (
+    process.env['APP_PASSCODE_READONLY'] &&
+    process.env['APP_PASSCODE_READONLY'] === process.env['APP_PASSCODE']
+  ) {
+    throw new Error('APP_PASSCODE_READONLY is the same as APP_PASSCODE — the read-only role would never apply.');
   }
 }
 

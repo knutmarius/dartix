@@ -102,10 +102,19 @@ function BullPad({ round, onCommit }: EntryPadProps) {
  */
 function BinaryPad({ onCommit }: EntryPadProps) {
   return (
-    <div className="flex grow gap-3">
+    /*
+     * `flex-1 basis-0` on both halves, not `grow`: with an auto basis the
+     * longer label ("halves your total") made the miss button the wider of
+     * the two, which read as a recommendation.
+     *
+     * And no vertical `grow` on the row — the pad stretches to the height of
+     * the turn card beside it, which since the card grew a full-size
+     * dartboard would blow these two up to 650px tall.
+     */
+    <div className="flex gap-3">
       <button
         onClick={() => onCommit(1)}
-        className="flex grow flex-col items-center justify-center gap-1 rounded-xl border border-good/45 bg-good/12 py-4 transition-colors hover:bg-good/20 sm:py-6"
+        className="flex flex-1 basis-0 flex-col items-center justify-center gap-1 rounded-xl border border-good/45 bg-good/12 py-4 transition-colors hover:bg-good/20 sm:py-6"
       >
         <span className="dsp text-3xl leading-none font-bold text-good">HIT</span>
         <span className="label num text-good!">+41</span>
@@ -113,7 +122,7 @@ function BinaryPad({ onCommit }: EntryPadProps) {
       </button>
       <button
         onClick={() => onCommit(0)}
-        className="flex grow flex-col items-center justify-center gap-1 rounded-xl border border-danger/45 bg-danger/12 py-4 transition-colors hover:bg-danger/20 sm:py-6"
+        className="flex flex-1 basis-0 flex-col items-center justify-center gap-1 rounded-xl border border-danger/45 bg-danger/12 py-4 transition-colors hover:bg-danger/20 sm:py-6"
       >
         <span className="dsp text-3xl leading-none font-bold text-danger">MISS</span>
         <span className="label text-danger!">halves your total</span>

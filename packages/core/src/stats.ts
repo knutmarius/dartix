@@ -423,6 +423,14 @@ export interface Records {
     playerName: string; when: Date; round: RoundKey; from: number; to: number; lost: number;
   } | null;
   longestWinStreak: { playerId: string; playerName: string; streak: number } | null;
+  /**
+   * Everyone who has finished a game on nothing at all, most recent first.
+   *
+   * Zero is only reachable by blanking all twelve rounds: halving rounds up,
+   * so `halve(1)` is 1 — a single point in the 13s survives every halving
+   * that follows it. Anyone in this list scored in no round whatsoever.
+   */
+  zeroGames: { gameId: string; when: Date; playerId: string; playerName: string; fieldSize: number }[];
   mostHalved: { playerId: string; playerName: string; perGame: number } | null;
   bullKing: { playerId: string; playerName: string; hitRate: number } | null;
   /** Biggest climb from the standing after the 41 to the final standing. */
@@ -441,7 +449,7 @@ export function records(
 
   if (views.length === 0) {
     return {
-      topGames: [], bestRounds: [], biggestHalving: null,
+      topGames: [], bestRounds: [], biggestHalving: null, zeroGames: [],
       longestWinStreak: null, mostHalved: null, bullKing: null, biggestComeback: null,
     };
   }
@@ -511,6 +519,13 @@ export function records(
       })),
     bestRounds: ROUNDS.map((round) => bestForRound(views, round.key)),
     biggestHalving: biggest,
+    zeroGames: views
+      .filter((v) => v.total === 0)
+      .sort((a, b) => b.when.getTime() - a.when.getTime())
+      .map((v) => ({
+        gameId: v.gameId, when: v.when, playerId: v.playerId,
+        playerName: v.playerName, fieldSize: v.fieldSize,
+      })),
     longestWinStreak: streaks[0] ?? null,
     mostHalved: halved[0]
       ? { playerId: halved[0].playerId, playerName: halved[0].playerName, perGame: halved[0].halvingsPerGame }
@@ -614,4 +629,147 @@ function groupBy<T, K>(items: readonly T[], key: (item: T) => K): Map<K, T[]> {
  */
 function latestName(views: readonly ResultView[]): string {
   return views.reduce((acc, v) => (v.when.getTime() >= acc.when.getTime() ? v : acc), views[0]!).playerName;
+}
+
+/* ------------------------------------------------------------------ *
+ * Milestones — what the game that just finished was worth
+ * ------------------------------------------------------------------ */
+
+/** One player's result in a game that has not been saved yet. */
+export interface FinishedResult {
+  playerId: string;
+  playerName: string;
+  total: number;
+  points: RoundPoints;
+}
+
+export type Milestone =
+  /** No history at all — nothing to beat, so say that instead of nothing. */
+  | { kind: 'debut'; playerId: string; playerName: string }
+  | { kind: 'personal-best'; playerId: string; playerName: string; total: number; previous: number }
+  | { kind: 'personal-worst'; playerId: string; playerName: string; total: number; previous: number }
+  /** Landed in the all-time top scores, counting this game. */
+  | { kind: 'top-game'; playerId: string; playerName: string; total: number; position: number; of: number }
+  /** Beat the all-time best for one round outright. */
+  | { kind: 'round-record'; playerId: string; playerName: string; round: RoundKey; points: number; previous: number }
+  /** Won enough in a row to hold or share the longest streak on record. */
+  | { kind: 'win-streak'; playerId: string; playerName: string; streak: number; previous: number }
+  /** Finished on nothing — all twelve rounds blanked. `before` counts how
+   *  many times it had happened previously. */
+  | { kind: 'zero-game'; playerId: string; playerName: string; before: number };
+
+export interface MilestoneOptions {
+  /** How deep the all-time top-scores table goes. Matches the records page. */
+  top?: number;
+}
+
+/**
+ * What the game that has just been played changed, measured against history.
+ *
+ * Deliberately computed on the client from the game in hand plus the history
+ * already in cache, so the summary can show it *before* the save — the moment
+ * it is interesting is while everyone is still standing at the board.
+ *
+ * Two rules worth stating, because both suppress a lot of noise:
+ *
+ *   - A round record counts only when it is beaten outright. Matching one is
+ *     common — five players share the doubles best and seventeen share the 41
+ *     — and the 41 in particular can only ever be equalled, since its maximum
+ *     is its multiplier. Reporting matches would fire almost every game.
+ *   - A personal best or worst needs prior games to be a personal anything.
+ *     A first-timer gets `debut` instead.
+ */
+export function milestones(
+  results: readonly FinishedResult[],
+  history: readonly HalfItGameDoc[],
+  options: MilestoneOptions = {},
+): Milestone[] {
+  const top = options.top ?? 10;
+  const past = flatten(history);
+  const out: Milestone[] = [];
+
+  const standings = rankPlayers(
+    results.map((r) => ({ playerId: r.playerId, playerName: r.playerName, total: r.total })),
+  );
+  const byPlayer = groupBy(past, (v) => v.playerId);
+
+  /* ---- personal bests, worsts and debuts ---- */
+  for (const result of results) {
+    const mine = byPlayer.get(result.playerId) ?? [];
+    if (mine.length === 0) {
+      out.push({ kind: 'debut', playerId: result.playerId, playerName: result.playerName });
+      continue;
+    }
+    const totals = mine.map((v) => v.total);
+    const high = Math.max(...totals);
+    const low = Math.min(...totals);
+    if (result.total > high) {
+      out.push({
+        kind: 'personal-best', playerId: result.playerId, playerName: result.playerName,
+        total: result.total, previous: high,
+      });
+    } else if (result.total < low) {
+      out.push({
+        kind: 'personal-worst', playerId: result.playerId, playerName: result.playerName,
+        total: result.total, previous: low,
+      });
+    }
+  }
+
+  /* ---- the all-time top scores, with tonight folded in ---- */
+  const allTotals = [...past.map((v) => v.total), ...results.map((r) => r.total)]
+    .sort((a, b) => b - a);
+  for (const result of results) {
+    // Competition ranking: everyone strictly above you pushes you down.
+    const position = allTotals.filter((t) => t > result.total).length + 1;
+    if (position <= top) {
+      out.push({
+        kind: 'top-game', playerId: result.playerId, playerName: result.playerName,
+        total: result.total, position, of: top,
+      });
+    }
+  }
+
+  /* ---- round records, beaten outright ---- */
+  for (const round of ROUNDS) {
+    const previous = past.reduce((max, v) => Math.max(max, v.points[round.key] ?? 0), 0);
+    for (const result of results) {
+      const points = result.points[round.key] ?? 0;
+      if (points > previous) {
+        out.push({
+          kind: 'round-record', playerId: result.playerId, playerName: result.playerName,
+          round: round.key, points, previous,
+        });
+      }
+    }
+  }
+
+  /* ---- finished on nothing ---- */
+  const zeroesBefore = past.filter((v) => v.total === 0).length;
+  for (const result of results) {
+    if (result.total !== 0) continue;
+    out.push({
+      kind: 'zero-game', playerId: result.playerId, playerName: result.playerName,
+      before: zeroesBefore,
+    });
+  }
+
+  /* ---- win streaks ---- */
+  const longest = Math.max(
+    0,
+    ...[...byPlayer.values()].map((vs) => winStreaks(vs.map((v) => v.isWinner)).best),
+  );
+  for (const standing of standings) {
+    if (!standing.isWinner) continue;
+    const mine = byPlayer.get(standing.playerId) ?? [];
+    const streak = winStreaks(mine.map((v) => v.isWinner)).current + 1;
+    if (streak >= 2 && streak >= longest) {
+      out.push({
+        kind: 'win-streak', playerId: standing.playerId, playerName: standing.playerName,
+        streak, previous: longest,
+      });
+    }
+  }
+
+  return out;
 }

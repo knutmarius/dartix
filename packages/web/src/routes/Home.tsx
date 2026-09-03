@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { ROUNDS, rankPlayers, totalFor } from '@dartix/core';
 import { api } from '../api';
 import { useGame, hasGameInProgress, activeRound } from '../store/game';
+import { RoundCarousel } from '../components/RoundCarousel';
+import { useRoundCycle } from '../lib/useRoundCycle';
 import { Arrow, Avatar, Button, Card, Label, Loading, ErrorNote, formatDate, formatTime } from '../components/ui';
 
 export function Home() {
@@ -10,63 +12,96 @@ export function Home() {
   const game = useGame();
   const inProgress = hasGameInProgress(game);
   const recent = useQuery({ queryKey: ['games'], queryFn: () => api.games() });
+  const cycle = useRoundCycle();
 
   return (
     <div className="flex flex-col gap-6 p-6 md:flex-row md:p-8">
       {/* start */}
       <section className="flex grow flex-col rounded-2xl border border-line bg-surface p-8 md:p-10">
-        <Label className="text-accent!">Half-it</Label>
-        <h1 className="dsp mt-3 text-5xl leading-[0.98] font-bold md:text-6xl">
-          Twelve rounds.<br />One blank and<br />you lose half.
-        </h1>
-        <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-ink-2">
-          Work through the board in order. Score in a round and it adds up; miss it
-          entirely and your whole total is halved, rounded up. The 41 is where most
-          evenings are decided — it gets blanked more than four times in five.
-        </p>
+        <div className="flex flex-col items-stretch gap-8 lg:flex-row lg:items-start lg:gap-10">
+          <div className="flex min-w-0 grow flex-col">
+            <Label className="text-accent!">Half-it</Label>
+            <h1 className="dsp mt-3 text-5xl leading-[0.98] font-bold md:text-6xl">
+              Twelve rounds.<br />One blank and<br />you lose half.
+            </h1>
+            <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-ink-2">
+              Work through the board in order. Score in a round and it adds up; miss it
+              entirely and your whole total is halved, rounded up. The 41 is where most
+              evenings are decided — it gets blanked more than four times in five.
+            </p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link
-            to="/play/setup"
-            className="flex items-center gap-3 rounded-xl bg-accent px-7 py-4 text-ground transition-colors hover:bg-accent/90"
-          >
-            <span className="dsp text-xl font-bold">New game</span>
-            <Arrow />
-          </Link>
-          <Link to="/stats" className="dsp rounded-xl border border-line px-5 py-4 text-[17px] font-semibold text-ink-2 transition-colors hover:text-ink">
-            Stats
-          </Link>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                to="/play/setup"
+                className="flex items-center gap-3 rounded-xl bg-accent px-7 py-4 text-ground transition-colors hover:bg-accent/90"
+              >
+                <span className="dsp text-xl font-bold">New game</span>
+                <Arrow />
+              </Link>
+              <Link to="/stats" className="dsp rounded-xl border border-line px-5 py-4 text-[17px] font-semibold text-ink-2 transition-colors hover:text-ink">
+                Stats
+              </Link>
+            </div>
+          </div>
+
+          {/*
+            * The twelve rounds in order, two seconds each.
+            *
+            * On a phone it drops below the copy and the strip of rounds below
+            * goes away instead — the board says the same thing better, and
+            * two round indicators on one screen is one too many.
+            */}
+          <div className="mx-auto w-full max-w-[264px] shrink-0 sm:max-w-[300px] lg:mx-0 lg:w-[250px] lg:max-w-none xl:w-[300px]">
+            <RoundCarousel index={cycle.index} onPick={cycle.pick} />
+          </div>
         </div>
 
         <div className="grow" />
 
-        <div className="mt-10">
+        {/* Desktop only: on a phone the carousel above already carries the
+            order, and this row is what pays for its space. */}
+        <div className="mt-10 hidden lg:block">
           <Label>The order, always the same</Label>
           <div className="mt-3 grid grid-cols-6 gap-1.5 sm:grid-cols-12">
-            {ROUNDS.map((round) => {
+            {ROUNDS.map((round, index) => {
               const special = round.kind !== 'count';
               const brutal = round.key === '41';
+              /* The one the board beside is showing. A filled block rather
+                 than a brighter border, so it wins against the D/T/B and 41
+                 tints already in play here. */
+              const now = index === cycle.index;
               return (
-                <div
+                <button
                   key={round.key}
+                  onClick={() => cycle.pick(index)}
                   title={`${round.name} — ×${round.multiplier}`}
-                  className={`flex h-14 flex-col items-center justify-center rounded-lg border ${
-                    brutal
-                      ? 'border-danger/50 bg-danger/10'
-                      : special
-                        ? 'border-accent/45 bg-accent/8'
-                        : 'border-line'
+                  className={`flex h-14 flex-col items-center justify-center rounded-lg border transition-colors duration-300 ${
+                    now
+                      ? 'border-accent bg-accent'
+                      : brutal
+                        ? 'border-danger/50 bg-danger/10'
+                        : special
+                          ? 'border-accent/45 bg-accent/8'
+                          : 'border-line hover:border-ink-3'
                   }`}
                 >
-                  <span className={`dsp text-lg font-semibold ${brutal ? 'text-danger' : special ? 'text-accent' : ''}`}>
+                  <span
+                    className={`dsp text-lg font-semibold transition-colors duration-300 ${
+                      now ? 'text-ground' : brutal ? 'text-danger' : special ? 'text-accent' : ''
+                    }`}
+                  >
                     {round.label}
                   </span>
                   {special ? (
-                    <span className={`text-[9px] font-semibold tracking-wide uppercase ${brutal ? 'text-danger' : 'text-accent'}`}>
+                    <span
+                      className={`text-[9px] font-semibold tracking-wide uppercase transition-colors duration-300 ${
+                        now ? 'text-ground/75' : brutal ? 'text-danger' : 'text-accent'
+                      }`}
+                    >
                       {round.key === 'D' ? 'doubles' : round.key === 'T' ? 'trebles' : round.key === 'B' ? 'bull' : 'exact'}
                     </span>
                   ) : null}
-                </div>
+                </button>
               );
             })}
           </div>

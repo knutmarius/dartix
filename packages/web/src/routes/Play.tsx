@@ -10,6 +10,7 @@ import { Board } from '../components/Board';
 import { MobileBoard } from '../components/MobileBoard';
 import { EntryPad } from '../components/EntryPad';
 import { TurnCard } from '../components/TurnCard';
+import { RosterSheet } from '../components/RosterSheet';
 import { Button, Label } from '../components/ui';
 
 /** A halving worth more than this plays the trombone, as it always has. */
@@ -19,12 +20,13 @@ export function Play() {
   const navigate = useNavigate();
   const game = useGame();
   const {
-    players, inputs, draft, muted,
-    commit, undo, clearCell, moveBy, moveTo, addToDraft, clearDraft, toggleMute,
+    players, inputs, draft, draftFaces, muted, reviewing,
+    commit, undo, clearCell, moveBy, moveTo, addToDraft, clearDraft, toggleMute, endReview,
   } = game;
 
   const [typed, setTyped] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [showRoster, setShowRoster] = useState(false);
 
   const averages = useHistoricalAverages(players);
   const playTrombone = useFailSound(muted);
@@ -47,8 +49,13 @@ export function Play() {
   );
 
   useEffect(() => {
-    if (finished) navigate('/play/summary', { replace: true });
-  }, [finished, navigate]);
+    if (finished && !reviewing) navigate('/play/summary', { replace: true });
+  }, [finished, reviewing, navigate]);
+
+  const done = useCallback(() => {
+    endReview();
+    navigate('/play/summary', { replace: true });
+  }, [endReview, navigate]);
 
   /* ---- keyboard ----
    *
@@ -155,6 +162,9 @@ export function Play() {
 
   const playerIndex = players.findIndex((p) => p.id === player.id);
   const shownDraft = typed !== null ? Number(typed) : draft;
+  /* A typed total overrides the tapped faces, and we cannot know which faces
+     it stood for, so the board marks nothing rather than something stale. */
+  const shownHits = typed !== null ? [] : draftFaces;
 
   const jumpTo = (r: number, p: number) => { setTyped(null); moveTo(r, p); };
 
@@ -175,7 +185,9 @@ export function Play() {
           inputs={inputs}
           activeRoundIndex={round.index}
           activePlayerIndex={playerIndex}
+          hits={shownHits}
           onPick={jumpTo}
+          onRoster={() => setShowRoster(true)}
         />
       </div>
 
@@ -206,7 +218,12 @@ export function Play() {
                    md:border-0 md:px-8 md:pt-6 md:pb-0 lg:flex-row"
       >
         <div className="hidden lg:block">
-          <TurnCard playerName={player.name} round={round.round} total={total} />
+          <TurnCard
+            playerName={player.name}
+            round={round.round}
+            total={total}
+            hits={shownHits}
+          />
         </div>
         <EntryPad
           round={round.round}
@@ -240,9 +257,17 @@ export function Play() {
           </div>
         ))}
         <div className="grow" />
+        {reviewing ? (
+          <Button variant="primary" onClick={done}>Back to summary</Button>
+        ) : null}
+        <Button variant="ghost" onClick={() => setShowRoster(true)}>
+          Players ({players.length})
+        </Button>
         <Button variant="ghost" onClick={toggleMute}>{muted ? 'Sound off' : 'Sound on'}</Button>
         <Button variant="ghost" onClick={() => navigate('/')}>Pause</Button>
       </div>
+
+      {showRoster ? <RosterSheet onClose={() => setShowRoster(false)} /> : null}
 
       {showHelp ? (
         <div

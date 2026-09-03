@@ -77,6 +77,57 @@
   color: var(--color-ink-3);
 }
 
+/*
+ * The lit segments of the dartboard breathe.
+ *
+ * Animating the group's opacity rather than each of eighty segments' own
+ * `fill-opacity` keeps their relative grading intact and gives the compositor
+ * a single property to handle. Held to a shallow swing and a slow cycle — this
+ * sits a few centimetres from live scores and must not compete with them.
+ */
+@keyframes dartboard-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.dartboard-pulse {
+  animation: dartboard-pulse 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dartboard-pulse {
+    animation: none;
+  }
+}
+
+/*
+ * A change of target cross-dissolves rather than snapping.
+ *
+ * Works because every segment is always in the DOM — the lit ones simply
+ * carry a non-zero `fill-opacity` — so this is a transition on existing
+ * elements rather than a mount. `fill` is in the list for the 41, whose
+ * segments move between the accent and the halving colour, and `font-size`
+ * for the number ring, which grows for the round in play.
+ */
+.dartboard-lit path,
+.dartboard-lit circle,
+.dartboard-lit text {
+  transition:
+    fill 420ms ease,
+    fill-opacity 420ms ease,
+    stroke-opacity 420ms ease,
+    font-size 420ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dartboard-lit path,
+  .dartboard-lit circle,
+  .dartboard-lit text {
+    transition: none;
+  }
+}
+
+
 /* Recharts paints its own surfaces; keep its tooltips on our palette. */
 .recharts-default-tooltip {
   background: var(--color-surface) !important;

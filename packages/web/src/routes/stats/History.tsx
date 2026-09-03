@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../api';
 import { useRange } from '../../lib/useRange';
+import { useSession } from '../../lib/useSession';
 import {
   Avatar, Button, Card, Empty, ErrorNote, Label, Loading, formatDate, formatTime,
 } from '../../components/ui';
@@ -9,6 +10,7 @@ import {
 export function History() {
   const range = useRange();
   const client = useQueryClient();
+  const { canWrite } = useSession();
   const [open, setOpen] = useState<string | null>(null);
 
   const games = useQuery({
@@ -60,7 +62,7 @@ export function History() {
           </button>
 
           {open === game.gameId ? (
-            <GameDetail id={game.gameId} onDelete={() => {
+            <GameDetail id={game.gameId} canDelete={canWrite} onDelete={() => {
               if (confirm('Delete this game from the database?')) remove.mutate(game.gameId);
             }} deleting={remove.isPending} />
           ) : null}
@@ -77,8 +79,8 @@ export function History() {
  * it looked clickable and did nothing.
  */
 function GameDetail({
-  id, onDelete, deleting,
-}: { id: string; onDelete: () => void; deleting: boolean }) {
+  id, onDelete, deleting, canDelete,
+}: { id: string; onDelete: () => void; deleting: boolean; canDelete: boolean }) {
   const detail = useQuery({ queryKey: ['game', id], queryFn: () => api.game(id) });
 
   if (detail.isPending) return <div className="px-4 pb-4"><Loading what="Opening the scoreboard" /></div>;
@@ -134,9 +136,11 @@ function GameDetail({
           A red zero halved everything above it, rounded up.
         </span>
         <div className="grow" />
-        <Button variant="danger" onClick={onDelete} disabled={deleting}>
-          {deleting ? 'Deleting' : 'Delete game'}
-        </Button>
+        {canDelete ? (
+          <Button variant="danger" onClick={onDelete} disabled={deleting}>
+            {deleting ? 'Deleting' : 'Delete game'}
+          </Button>
+        ) : null}
       </div>
     </div>
   );

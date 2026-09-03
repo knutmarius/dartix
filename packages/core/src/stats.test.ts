@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildGameDocument } from './mongo.js';
+import { pointsByRound, totalFor } from './scoring.js';
 import {
-  flatten, gameHistory, headToHead, leaderboard, playerProfile, records, roundMatrix,
+  flatten, gameHistory, headToHead, leaderboard, milestones, playerProfile, records, roundMatrix,
 } from './stats.js';
 import type { HalfItGameDoc, RoundInputs } from './types.js';
 
@@ -420,5 +421,161 @@ describe('gameHistory', () => {
     const g3 = history.find((h) => h.gameId === 'g3')!;
     expect(g3.players.every((p) => p.position === 1)).toBe(true);
     expect(g3.winner.total).toBe(472);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * milestones
+ * ------------------------------------------------------------------ */
+
+describe('milestones', () => {
+  const pointsFor = (inputs: RoundInputs) => pointsByRound(inputs);
+  const result = (p: { id: string; name: string }, inputs: RoundInputs) => ({
+    playerId: p.id,
+    playerName: p.name,
+    total: totalFor(inputs),
+    points: pointsFor(inputs),
+  });
+
+  const kinds = (ms: readonly { kind: string }[]) => ms.map((m) => m.kind).sort();
+
+  it('calls a player with no history a debut, not a personal best', () => {
+    const nils = { id: 'n', name: 'Nils' };
+    const found = milestones([result(nils, CLEAN)], GAMES);
+    expect(found.filter((m) => m.kind === 'debut')).toEqual([
+      { kind: 'debut', playerId: 'n', playerName: 'Nils' },
+    ]);
+    expect(kinds(found)).not.toContain('personal-best');
+  });
+
+  it('flags a personal best against that player alone', () => {
+    // Øyvind's best in the fixture is 353; Knut's is 472.
+    const found = milestones([result(OYVIND, CLEAN), result(KNUT, LATE_BLANK)], GAMES);
+    const best = found.filter((m) => m.kind === 'personal-best');
+    expect(best).toHaveLength(1);
+    expect(best[0]).toMatchObject({ playerId: 'o', total: 472, previous: 353 });
+  });
+
+  it('flags a personal worst, and never both for one player', () => {
+    const found = milestones([result(MARIT, NO_BULL)], GAMES);
+    // Marit's fixture range is 276–472, so 211 is a new low.
+    expect(found.filter((m) => m.kind === 'personal-worst')).toMatchObject([
+      { playerId: 'm', total: 211, previous: 276 },
+    ]);
+    expect(found.filter((m) => m.kind === 'personal-best')).toEqual([]);
+  });
+
+  it('ranks a score into the all-time table with this game counted', () => {
+    // Fixture totals, descending: 472 ×4, 353 ×3, 276 ×2, 211.
+    // Competition ranking, as everywhere else in the app: a tie shares the
+    // position rather than being pushed behind the others on the same score.
+    const top = milestones([result(KNUT, CLEAN)], GAMES, { top: 10 });
+    expect(top.filter((m) => m.kind === 'top-game')).toMatchObject([
+      { playerId: 'k', total: 472, position: 1, of: 10 },
+    ]);
+
+    // 353 has the four 472s above it, so it comes in fifth.
+    const mid = milestones([result(KNUT, EARLY_BLANK)], GAMES, { top: 10 });
+    expect(mid.filter((m) => m.kind === 'top-game')).toMatchObject([
+      { playerId: 'k', total: 353, position: 5, of: 10 },
+    ]);
+  });
+
+  it('leaves a score outside the table alone', () => {
+    const weak: RoundInputs = { '13': 1, '14': 0, D: 0, '15': 0, '16': 0, T: 0, '17': 0, '18': 0, '41': 0, '19': 0, '20': 1, B: 0 };
+    const found = milestones([result(KNUT, weak)], GAMES, { top: 3 });
+    expect(kinds(found)).not.toContain('top-game');
+  });
+
+  it('reports a round record only when it is beaten outright', () => {
+    // Every fixture set hits T20 for 60, the maximum, so matching it is not a
+    // record. The 19s top out at 3 × 19 = 57, so 4 × 19 beats them.
+    const matched = milestones([result(KNUT, CLEAN)], GAMES);
+    expect(matched.filter((m) => m.kind === 'round-record')).toEqual([]);
+
+    const beaten = milestones([result(KNUT, { ...CLEAN, '19': 4 })], GAMES);
+    expect(beaten.filter((m) => m.kind === 'round-record')).toMatchObject([
+      { round: '19', points: 76, previous: 57 },
+    ]);
+  });
+
+  it('never reports a record for the 41, which can only ever be equalled', () => {
+    const found = milestones([result(KNUT, CLEAN)], GAMES);
+    expect(found.filter((m) => m.kind === 'round-record' && m.round === '41')).toEqual([]);
+  });
+
+  it('reports a win streak that reaches the longest on record', () => {
+    // Marit loses g1 then wins g2, g3 and g4 — a run of three, the longest
+    // anyone in the fixture has managed. Winning tonight makes it four.
+    const found = milestones([result(MARIT, CLEAN), result(KNUT, LATE_BLANK)], GAMES);
+    expect(found.filter((m) => m.kind === 'win-streak')).toMatchObject([
+      { playerId: 'm', streak: 4, previous: 3 },
+    ]);
+  });
+
+  it('says nothing about a winner whose run is too short to matter', () => {
+    // Knut's fixture record is win, lose, win, lose, so tonight is a run of
+    // one — well short of the three on record.
+    const found = milestones([result(KNUT, CLEAN), result(OYVIND, LATE_BLANK)], GAMES);
+    expect(found.filter((m) => m.kind === 'win-streak')).toEqual([]);
+  });
+
+  it('finds nothing to say about an unremarkable game', () => {
+    const middling: RoundInputs = { ...EARLY_BLANK, '20': 1 };
+    const found = milestones([result(KNUT, middling), result(OYVIND, LATE_BLANK)], GAMES, { top: 3 });
+    expect(kinds(found)).toEqual([]);
+  });
+});
+
+it('lists the per-round records in playing order, not by score', () => {
+  // The multipliers rise through the game, so sorting by points would very
+  // nearly reproduce the round order and then scramble it around D, T and B —
+  // and the row you are looking for would move between date ranges.
+  expect(records(GAMES).bestRounds.map((r) => r.key)).toEqual(
+    ['13', '14', 'D', '15', '16', 'T', '17', '18', '41', '19', '20', 'B'],
+  );
+});
+
+describe('finishing on nothing', () => {
+  const ALL_BLANK: RoundInputs = {
+    '13': 0, '14': 0, D: 0, '15': 0, '16': 0, T: 0,
+    '17': 0, '18': 0, '41': 0, '19': 0, '20': 0, B: 0,
+  };
+
+  it('is the only way to reach zero — one point survives every halving', () => {
+    // halve() rounds up, so a single point in the 13s is still a point twelve
+    // rounds later. That is what makes a total of 0 mean "scored nothing".
+    const oneAndBlanks: RoundInputs = { ...ALL_BLANK, '13': 1 };
+    expect(totalFor(oneAndBlanks)).toBe(1);
+    expect(totalFor(ALL_BLANK)).toBe(0);
+  });
+
+  it('records nobody when nobody has done it', () => {
+    expect(records(GAMES).zeroGames).toEqual([]);
+  });
+
+  it('records the player, most recent first', () => {
+    const OSCAR = { id: 'x', name: 'Oscar' };
+    const withZero = [
+      ...GAMES,
+      game('g5', '2026-05-10T19:00:00Z', [[KNUT, CLEAN], [OSCAR, ALL_BLANK]]),
+      game('g6', '2026-06-10T19:00:00Z', [[KNUT, CLEAN], [OYVIND, ALL_BLANK]]),
+    ];
+    const zeroes = records(withZero).zeroGames;
+    expect(zeroes.map((z) => z.playerName)).toEqual(['Øyvind', 'Oscar']);
+    expect(zeroes[0]).toMatchObject({ gameId: 'g6', fieldSize: 2 });
+  });
+
+  it('shows up on the summary as a milestone, with the tally so far', () => {
+    const found = milestones(
+      [
+        { playerId: 'k', playerName: 'Knut', total: totalFor(CLEAN), points: pointsByRound(CLEAN) },
+        { playerId: 'm', playerName: 'Marit', total: 0, points: pointsByRound(ALL_BLANK) },
+      ],
+      GAMES,
+    );
+    expect(found.filter((m) => m.kind === 'zero-game')).toEqual([
+      { kind: 'zero-game', playerId: 'm', playerName: 'Marit', before: 0 },
+    ]);
   });
 });

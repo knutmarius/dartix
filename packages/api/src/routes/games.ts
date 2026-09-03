@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import {
-  ROUND_KEYS, buildGameDocument, gameHistory, isRoundKey, validateSubmission,
+  ROUND_KEYS, buildGameDocument, gameHistory, isRoundKey, milestones, pointsByRound,
+  totalFor, validateSubmission,
 } from '@dartix/core';
 import type { GameEntry, RoundInputs } from '@dartix/core';
 import { allGames, gamesInRange, games, invalidateGames } from '../db.js';
+import { requireWrite } from '../auth.js';
 import { badRequest, dateParam, notFound, sendError } from '../http.js';
 
 export const gamesRouter = Router();
@@ -52,7 +54,7 @@ gamesRouter.get('/:id', async (req, res) => {
  * client sends only what the players typed; the server derives every score,
  * every total and the standings, and mints the id.
  */
-gamesRouter.post('/', async (req, res) => {
+gamesRouter.post('/', requireWrite, async (req, res) => {
   try {
     const entries = parseEntries(req.body);
     const { errors, warnings } = validateSubmission(entries);
@@ -82,7 +84,7 @@ gamesRouter.post('/', async (req, res) => {
   }
 });
 
-gamesRouter.delete('/:id', async (req, res) => {
+gamesRouter.delete('/:id', requireWrite, async (req, res) => {
   try {
     const result = await (await games()).deleteOne({ _id: req.params.id });
     if (result.deletedCount === 0) throw notFound('No such game.');
@@ -94,6 +96,40 @@ gamesRouter.delete('/:id', async (req, res) => {
 });
 
 /** Turn a posted body into game entries, rejecting anything malformed. */
+/**
+ * What a game would mean, measured against everything played before it.
+ *
+ * A POST because it takes a whole game in the body, but it writes nothing —
+ * the summary screen calls it before the save so the room can see who just
+ * broke what while everyone is still standing at the board. Deliberately
+ * left open to a read-only session for the same reason: it changes nothing,
+ * and they should still see what the game they just played was worth.
+ *
+ * Server-side because the comparison needs the full history, and shipping ten
+ * years of documents to the client to compute six sentences would be silly.
+ * The games are already cached in-process.
+ */
+gamesRouter.post('/milestones', async (req, res) => {
+  try {
+    const entries = parseEntries(req.body);
+    const history = await allGames();
+    res.json(
+      milestones(
+        entries.map((entry) => ({
+          playerId: entry.playerId,
+          playerName: entry.playerName,
+          total: totalFor(entry.inputs),
+          points: pointsByRound(entry.inputs),
+        })),
+        history,
+        { top: 10 },
+      ),
+    );
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
 function parseEntries(body: unknown): GameEntry[] {
   const raw = (body as { players?: unknown } | undefined)?.players;
   if (!Array.isArray(raw)) {

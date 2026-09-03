@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api';
 import { Label } from './ui';
+import { useSession } from '../lib/useSession';
 
 /**
  * Two destinations, both real URLs.
@@ -13,6 +14,7 @@ import { Label } from './ui';
  */
 export function Chrome() {
   const client = useQueryClient();
+  const { readOnly } = useSession();
   const logout = useMutation({
     mutationFn: api.logout,
     onSuccess: () => client.clear(),
@@ -46,6 +48,14 @@ export function Chrome() {
         </nav>
 
         <div className="grow" />
+
+        {/* Named rather than merely implied by absent buttons — otherwise a
+            missing Save reads as a bug. */}
+        {readOnly ? (
+          <span className="label mr-4 rounded-md border border-line px-2.5 py-1 text-ink-3">
+            View only
+          </span>
+        ) : null}
 
         <button
           onClick={() => logout.mutate()}

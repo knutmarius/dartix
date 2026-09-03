@@ -1,5 +1,5 @@
 import type {
-  GameSummary, LeaderboardRow, PlayerProfile, Records, RoundKey, RoundKind,
+  GameSummary, LeaderboardRow, Milestone, PlayerProfile, Records, RoundKey, RoundKind,
 } from '@dartix/core';
 
 /**
@@ -149,10 +149,18 @@ function query(params: object): string {
   return s ? `?${s}` : '';
 }
 
+/** What the passcode you signed in with allows. */
+export type Role = 'full' | 'readonly';
+
+export interface Session {
+  authenticated: boolean;
+  role: Role | null;
+}
+
 export const api = {
-  session: () => get<{ authenticated: boolean }>('/api/auth/session'),
-  login: (passcode: string) => post<{ authenticated: boolean }>('/api/auth/login', { passcode }),
-  logout: () => post<{ authenticated: boolean }>('/api/auth/logout'),
+  session: () => get<Session>('/api/auth/session'),
+  login: (passcode: string) => post<Session>('/api/auth/login', { passcode }),
+  logout: () => post<Session>('/api/auth/logout'),
 
   rules: () => get<RulesResponse>('/api/rules'),
   health: () => get<{ ok: boolean; database: string }>('/api/health'),
@@ -166,6 +174,9 @@ export const api = {
   game: (id: string) => get<GameDetail>(`/api/games/${id}`),
   saveGame: (players: { playerId: string; playerName: string; inputs: Partial<Record<RoundKey, number>> }[]) =>
     post<SavedGame>('/api/games', { players }),
+  /** What this game changed, before it is saved. Writes nothing. */
+  milestones: (players: { playerId: string; playerName: string; inputs: Partial<Record<RoundKey, number>> }[]) =>
+    post<Milestone[]>('/api/games/milestones', { players }),
   deleteGame: (id: string) => del<{ deleted: boolean }>(`/api/games/${id}`),
 
   leaderboard: (range: DateRangeQuery = {}) =>

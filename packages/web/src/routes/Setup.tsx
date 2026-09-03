@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api';
 import type { PlayerSummary } from '../api';
 import { useGame } from '../store/game';
+import { useSession } from '../lib/useSession';
 import {
   Arrow, Avatar, Button, Card, Empty, ErrorNote, Label, Loading, formatDate,
 } from '../components/ui';
@@ -21,6 +22,7 @@ export function Setup() {
   const navigate = useNavigate();
   const client = useQueryClient();
   const start = useGame((s) => s.start);
+  const { canWrite } = useSession();
 
   const players = useQuery({ queryKey: ['players'], queryFn: api.players });
   const [selected, setSelected] = useState<string[]>([]);
@@ -124,9 +126,14 @@ export function Setup() {
             );
           })}
 
+          {/* Creating a player is a database write. Picking existing ones and
+              playing a whole game is not, so a view-only session keeps all of
+              that — it just cannot save the result. */}
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-3 rounded-xl border border-dashed border-ink-4 p-4 text-left transition-colors hover:border-ink-3"
+            disabled={!canWrite}
+            title={canWrite ? undefined : 'This passcode cannot add players.'}
+            className="flex items-center gap-3 rounded-xl border border-dashed border-ink-4 p-4 text-left transition-colors hover:border-ink-3 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-ink-4"
           >
             <div className="grid size-9 shrink-0 place-items-center rounded-lg border border-dashed border-ink-4">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3"

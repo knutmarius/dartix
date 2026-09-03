@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { buildPlayerDocument, leaderboard } from '@dartix/core';
 import { allGames, invalidateGames, players } from '../db.js';
+import { requireWrite } from '../auth.js';
 import { badRequest, notFound, sendError, stringField } from '../http.js';
 
 export const playersRouter = Router();
@@ -37,7 +38,7 @@ playersRouter.get('/', async (_req, res) => {
   }
 });
 
-playersRouter.post('/', async (req, res) => {
+playersRouter.post('/', requireWrite, async (req, res) => {
   try {
     const name = stringField(req, 'name', 40);
     const collection = await players();
@@ -68,7 +69,7 @@ playersRouter.post('/', async (req, res) => {
  * button was dead UI: `#deletePlayers` was `display:none` and the handler was
  * bound to an id that existed nowhere.
  */
-playersRouter.delete('/:id', async (req, res) => {
+playersRouter.delete('/:id', requireWrite, async (req, res) => {
   try {
     const id = req.params.id;
     const result = await (await players()).deleteOne({ _id: id });

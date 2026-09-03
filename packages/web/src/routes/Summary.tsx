@@ -1,18 +1,22 @@
 import { useEffect, useMemo } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ROUNDS, rankPlayers, walk } from '@dartix/core';
 import { api } from '../api';
 import { hasGameInProgress, isFinished, useGame } from '../store/game';
 import { useCelebration } from '../lib/useCelebration';
+import { useSession } from '../lib/useSession';
 import { RunChart } from '../components/RunChart';
-import { Avatar, Button, Card, ErrorNote, Label, Stat, Warning } from '../components/ui';
+import { Milestones } from '../components/Milestones';
+import { Avatar, Button, Card, ErrorNote, Label, Stat, Warning, theRound } from '../components/ui';
 
 export function Summary() {
   const navigate = useNavigate();
   const client = useQueryClient();
   const game = useGame();
   const reset = useGame((s) => s.reset);
+  const review = useGame((s) => s.review);
+  const { canWrite } = useSession();
   const { players, inputs } = game;
 
   const celebrate = useCelebration(game.muted);
@@ -39,6 +43,25 @@ export function Summary() {
       reset();
       navigate('/', { replace: true });
     },
+  });
+
+  /*
+   * What tonight changed, worked out against the whole history.
+   *
+   * Asked of the server rather than computed here: the comparison needs every
+   * game ever played, which the API already holds in a process cache, and it
+   * is not worth shipping a decade of documents to the browser to produce six
+   * sentences. Nothing is written — the save is still the explicit button.
+   */
+  const notable = useQuery({
+    queryKey: ['milestones', players.map((p) => p.id).join(','), JSON.stringify(inputs)],
+    queryFn: () =>
+      api.milestones(
+        players.map((p) => ({ playerId: p.id, playerName: p.name, inputs: inputs[p.id] ?? {} })),
+      ),
+    enabled: gameOver,
+    staleTime: Infinity,
+    retry: false,
   });
 
   const analysis = useMemo(() => {
@@ -95,12 +118,27 @@ export function Summary() {
         <Button onClick={() => { if (confirm('Discard this game without saving?')) { reset(); navigate('/'); } }}>
           Discard
         </Button>
-        <Button variant="primary" disabled={save.isPending} onClick={() => save.mutate()}>
-          {save.isPending ? 'Saving' : 'Save game'}
+        {/* Nothing is written until Save, so a mistyped round should not cost
+            the whole game. Reopens the board sitting on the last entry. */}
+        <Button onClick={() => { review(); navigate('/play'); }}>
+          Fix a score
         </Button>
+        {canWrite ? (
+          <Button variant="primary" disabled={save.isPending} onClick={() => save.mutate()}>
+            {save.isPending ? 'Saving' : 'Save game'}
+          </Button>
+        ) : (
+          /* Discard and Fix a score both stay — a view-only session can still
+             score a whole game, it just cannot commit it to the database. */
+          <span className="text-[13px] text-ink-3">
+            This passcode cannot save games.
+          </span>
+        )}
       </div>
 
       {save.isError ? <ErrorNote error={save.error} retry={() => save.mutate()} /> : null}
+
+      <Milestones milestones={notable.data ?? []} />
 
       <div className="flex flex-col gap-5 lg:flex-row">
         {/* standings */}
@@ -166,7 +204,7 @@ export function Summary() {
               <Label className="text-danger!">Moment of the night</Label>
               <div className="flex items-baseline gap-3">
                 <span className="hero text-4xl leading-none font-bold text-danger">–{worst.lost}</span>
-                <span className="dsp text-lg font-semibold">{worst.name}, on the {worst.round}</span>
+                <span className="dsp text-lg font-semibold">{worst.name}, on {theRound(worst.round)}</span>
               </div>
               <p className="text-[13px] leading-relaxed text-ink-2">
                 Sitting on {worst.from}, blanked it, and walked away from the board on {worst.to}.

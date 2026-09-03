@@ -1,19 +1,32 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROUNDS, missOutcome, rankPlayers, walk } from '@dartix/core';
 import type { RoundInputs } from '@dartix/core';
 import type { GamePlayer } from '../store/game';
+import { Dartboard } from './Dartboard';
 import { Avatar, Label } from './ui';
 
 /** How many rounds of the grid survive on a phone. */
 const WINDOW = 3;
+
+/**
+ * Below this much slack the dartboard is not worth drawing.
+ *
+ * The space left under the standings swings from ~250px (three players, a
+ * one-row pad) to nothing (seven players on the doubles pad), and a 30px
+ * dartboard is a smudge, not a diagram.
+ */
+const MIN_BOARD = 108;
 
 export interface MobileBoardProps {
   players: GamePlayer[];
   inputs: Record<string, RoundInputs>;
   activeRoundIndex: number;
   activePlayerIndex: number;
+  /** Faces tapped so far this turn, on the doubles and trebles rounds. */
+  hits?: readonly number[];
   onPick: (roundIndex: number, playerIndex: number) => void;
+  onRoster: () => void;
 }
 
 /**
@@ -30,9 +43,21 @@ export interface MobileBoardProps {
  * The full twelve rounds are one tap away per player.
  */
 export function MobileBoard({
-  players, inputs, activeRoundIndex, activePlayerIndex, onPick,
+  players, inputs, activeRoundIndex, activePlayerIndex, hits, onPick, onRoster,
 }: MobileBoardProps) {
   const [sheetFor, setSheetFor] = useState<number | null>(null);
+
+  /* The slot's height comes from flex, never from its content, so measuring it
+     and then filling it cannot feed back into the measurement. */
+  const slot = useRef<HTMLDivElement>(null);
+  const [slack, setSlack] = useState(0);
+  useEffect(() => {
+    const el = slot.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setSlack(entry!.contentRect.height));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const walks = new Map(players.map((p) => [p.id, walk(inputs[p.id] ?? {})]));
   const standings = rankPlayers(
@@ -103,7 +128,17 @@ export function MobileBoard({
       {/* Standings, with the three-round window. */}
       <div className="flex min-h-0 grow flex-col px-3 pt-1.5">
         <div className="flex shrink-0 items-end pb-1.5">
-          <div className="w-[38%] shrink-0" />
+          {/* This cell was empty and sits directly above the names, which is
+              exactly where a control over who is playing belongs. */}
+          <div className="flex w-[38%] shrink-0 items-center">
+            <button onClick={onRoster} className="label flex items-center gap-1 text-[10px]! text-ink-3">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
+                strokeLinecap="round" className="size-3" aria-hidden>
+                <path d="M12 5v14" /><path d="M5 12h14" />
+              </svg>
+              {players.length} playing
+            </button>
+          </div>
           <div className="flex grow">
             {columns.map((i) => (
               <div key={ROUNDS[i]!.key} className="flex-1 text-center">
@@ -118,7 +153,13 @@ export function MobileBoard({
           <Label className="w-14 shrink-0 text-right text-[10px]!">Total</Label>
         </div>
 
-        <div className="-mr-1 flex min-h-0 grow flex-col gap-1 overflow-y-auto pr-1 pb-1">
+        {/*
+          * No `grow` here on purpose: the rows take the height they need and
+          * the board below absorbs the rest. Past five or six players the free
+          * space runs out, the board collapses to nothing, and this list goes
+          * back to scrolling — which is the right priority order.
+          */}
+        <div className="-mr-1 flex min-h-0 flex-col gap-1 overflow-y-auto pr-1 pb-1">
           {players.map((player, playerIndex) => {
             const state = walks.get(player.id)!;
             const standing = positions.get(player.id)!;
@@ -191,6 +232,22 @@ export function MobileBoard({
               </div>
             );
           })}
+        </div>
+
+        {/* Where to throw. Fills the slack under the standings and disappears
+            when there is none, so it never costs a player row. */}
+        <div
+          ref={slot}
+          className="flex min-h-0 grow basis-0 items-center justify-center overflow-hidden py-1.5"
+        >
+          {slack >= MIN_BOARD ? (
+            <Dartboard
+              round={round}
+              hits={hits}
+              labels={slack >= 170 ? 'all' : 'active'}
+              className="max-w-[300px]"
+            />
+          ) : null}
         </div>
       </div>
 
