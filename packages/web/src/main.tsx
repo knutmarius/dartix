@@ -7,6 +7,7 @@ import './index.css';
 import { ApiError, api } from './api';
 import { Chrome } from './components/Chrome';
 import { Login } from './components/Login';
+import { ThemeProvider } from './lib/theme';
 import { Loading } from './components/ui';
 
 import { Home } from './routes/Home';
@@ -78,9 +79,12 @@ function Gate() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={client}>
-      <BrowserRouter>
-        <Gate />
-      </BrowserRouter>
+      {/* Above the gate: the login screen should already be in your theme. */}
+      <ThemeProvider>
+        <BrowserRouter>
+          <Gate />
+        </BrowserRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

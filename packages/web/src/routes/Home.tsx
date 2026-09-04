@@ -128,7 +128,7 @@ export function Home() {
             <Link
               key={entry.gameId}
               to="/stats/history"
-              className="flex items-center gap-3.5 border-b border-line-soft py-3 last:border-0 hover:bg-white/2"
+              className="flex items-center gap-3.5 border-b border-line-soft py-3 last:border-0 hover:bg-ink/4"
             >
               <div className="flex w-16 shrink-0 flex-col">
                 <span className="dsp text-[15px] font-semibold">{formatDate(entry.when)}</span>

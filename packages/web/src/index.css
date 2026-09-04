@@ -29,13 +29,121 @@
   --color-series-1: #d95926;
   --color-series-2: #199e70;
   --color-series-3: #c98500;
+  --color-series-4: #d55181;
+  --color-series-5: #008300;
+  --color-series-6: #9085e9;
+  --color-series-7: #e66767;
+  --color-series-more: #8d95a2;
+
+  /* Chart furniture. Recessive by design; both values validated per theme. */
+  --color-grid: #262b33;
+  --color-axis: #626a77;
+
+  /* The dartboard's unlit beds, alternating by sector. */
+  --color-board-bed-a: #191c22;
+  --color-board-bed-b: #23272f;
+  --color-board-ring-a: #2b3038;
+  --color-board-ring-b: #3a414c;
 
   --font-sans: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
   --font-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
 }
 
+/* ------------------------------------------------------------------ *
+ * Light theme
+ *
+ * The app was built dark-first, so `@theme` above stays the dark palette and
+ * light is an override. Two selectors, in this order:
+ *
+ *   - the media query, so the device preference is the default;
+ *   - `[data-theme]`, set by the header toggle, which has to beat the query
+ *     in both directions — hence the `:not()` guard on the query.
+ *
+ * Only tokens change. Every `bg-surface` / `text-ink-2` / `border-line` in the
+ * app re-themes from these, which is the whole reason Tailwind v4 compiles its
+ * utilities down to `var()`.
+ *
+ * Contrast, measured against the lightest and darkest light surfaces
+ * (#ffffff and #eef1f5): ink 16.2:1, ink-2 6.8:1, ink-3 4.8:1, accent 4.8:1,
+ * danger 4.8:1, good 4.8:1 — all clear 4.5:1 for text. `ink-4` is decorative
+ * only (dividers, unplayed dots) and is not held to it.
+ *
+ * The series colours are unchanged apart from the yellow, which measured
+ * 2.99:1 against a light surface — just under the 3:1 a categorical fill
+ * needs. Darkened to #b37a00 and the whole set re-validated on both surfaces:
+ * lightness band, chroma floor, CVD separation and contrast all pass.
+ * ------------------------------------------------------------------ */
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+
+    --color-ground: #f6f7f9;
+    --color-surface: #ffffff;
+    --color-raised: #eef1f5;
+    --color-line: #d5dae2;
+    --color-line-soft: #e6eaf0;
+
+    --color-ink: #12151a;
+    --color-ink-2: #4b5462;
+    --color-ink-3: #636b78;
+    --color-ink-4: #aab2be;
+
+    --color-accent: #1668c7;
+    --color-accent-dim: #cfe3fa;
+    --color-danger: #c92a33;
+    --color-good: #10794a;
+
+    --color-series-3: #b37a00;
+    --color-series-more: #6d7683;
+
+    --color-grid: #e2e6ec;
+    --color-axis: #636b78;
+
+    /* Inverted: on paper the beds are pale and the wire rings darker. */
+    --color-board-bed-a: #e9edf3;
+    --color-board-bed-b: #dde3ec;
+    --color-board-ring-a: #c3cbd7;
+    --color-board-ring-b: #aab4c3;
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-ground: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-raised: #eef1f5;
+  --color-line: #d5dae2;
+  --color-line-soft: #e6eaf0;
+
+  --color-ink: #12151a;
+  --color-ink-2: #4b5462;
+  --color-ink-3: #636b78;
+  --color-ink-4: #aab2be;
+
+  --color-accent: #1668c7;
+  --color-accent-dim: #cfe3fa;
+  --color-danger: #c92a33;
+  --color-good: #10794a;
+
+  --color-series-3: #b37a00;
+  --color-series-more: #6d7683;
+
+  --color-grid: #e2e6ec;
+  --color-axis: #636b78;
+
+  /* Inverted: on paper the beds are pale and the wire rings darker. */
+  --color-board-bed-a: #e9edf3;
+  --color-board-bed-b: #dde3ec;
+  --color-board-ring-a: #c3cbd7;
+  --color-board-ring-b: #aab4c3;
+}
+
 @layer base {
   html {
+    /* The light blocks above override this; the toggle sets `data-theme` on
+       the root, so form controls and scrollbars follow the theme too. */
     color-scheme: dark;
     background: var(--color-ground);
   }

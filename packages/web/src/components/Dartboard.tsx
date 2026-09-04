@@ -54,10 +54,16 @@ const FACE: Record<Ring, number> = { inner: 1, treble: 3, outer: 1, double: 2 };
  */
 const WEDGE: Record<Ring, number> = { treble: 1, double: 0.84, inner: 0.62, outer: 0.62 };
 
-/** Unlit fills, alternating by sector so the board still reads as a board. */
+/**
+ * Unlit fills, alternating by sector so the board still reads as a board.
+ *
+ * Tokens rather than literals: on a light surface the same two-step
+ * alternation has to run the other way, or the whole board is a black disc on
+ * white paper.
+ */
 const DARK = {
-  bed: ['#191c22', '#23272f'],
-  ring: ['#2b3038', '#3a414c'],
+  bed: ['var(--color-board-bed-a)', 'var(--color-board-bed-b)'],
+  ring: ['var(--color-board-ring-a)', 'var(--color-board-ring-b)'],
 };
 
 /** What to light, worked out once per render. */

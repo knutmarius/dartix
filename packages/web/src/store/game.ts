@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ROUNDS, ROUND_COUNT, roundFor } from '@dartix/core';
+import { DARTS_PER_TURN, ROUNDS, ROUND_COUNT, roundFor } from '@dartix/core';
 import type { RoundInputs, RoundKey } from '@dartix/core';
 
 export interface GamePlayer {
@@ -222,7 +222,13 @@ export const useGame = create<GameState>()(
         });
       },
 
-      addToDraft: (face) => set({ draft: get().draft + face, draftFaces: [...get().draftFaces, face] }),
+      addToDraft: (face) => {
+        const { draft, draftFaces } = get();
+        // A turn is three darts. The sum ceiling alone does not catch this:
+        // five darts in the 1 sums to 5, well under the doubles round's 60.
+        if (draftFaces.length >= DARTS_PER_TURN) return;
+        set({ draft: draft + face, draftFaces: [...draftFaces, face] });
+      },
       clearDraft: () => set({ draft: 0, draftFaces: [] }),
       commitDraft: () => get().commit(get().draft),
 

@@ -37,7 +37,7 @@ export function History() {
         <Card key={game.gameId} className="p-0! overflow-hidden">
           <button
             onClick={() => setOpen(open === game.gameId ? null : game.gameId)}
-            className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-white/3"
+            className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-ink/5"
           >
             <div className="flex w-24 shrink-0 flex-col">
               <span className="dsp text-[15px] font-semibold">{formatDate(game.when)}</span>
@@ -107,7 +107,7 @@ function GameDetail({
           {[...results]
             .sort((a, b) => b.total - a.total)
             .map((result) => (
-              <div key={result.playerId} className="mt-1 flex items-center rounded-md py-1.5 hover:bg-white/3">
+              <div key={result.playerId} className="mt-1 flex items-center rounded-md py-1.5 hover:bg-ink/5">
                 <span className="dsp w-36 shrink-0 truncate pl-1 text-base font-semibold">
                   {result.playerName}
                 </span>

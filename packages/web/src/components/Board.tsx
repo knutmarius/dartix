@@ -130,10 +130,15 @@ export function Board({
                           ? undefined
                           : `${ROUNDS[roundIndex]!.name} — your average is ${average}`
                       }
-                      className={`relative flex flex-col items-center justify-center border-l border-line-soft transition-colors ${
+                      /* A translucent line, not `line-soft`: that is an
+                         opaque grey of much the same lightness as the tint on
+                         the leader's row, so on that one row the separators
+                         disappeared. Ink at 10% always darkens whatever is
+                         behind it, and inverts with the theme. */
+                      className={`relative flex flex-col items-center justify-center border-l border-ink/10 transition-colors ${
                         isActive
                           ? 'rounded-md border-l-transparent bg-accent/14 shadow-[inset_0_0_0_2px_var(--color-accent)]'
-                          : 'hover:bg-white/3'
+                          : 'hover:bg-ink/5'
                       }`}
                     >
                       {isActive ? (

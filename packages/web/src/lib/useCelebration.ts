@@ -1,10 +1,27 @@
 import { useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { SERIES } from './palette';
 import { useApplause } from './useSound';
 
-/** The app's own colours, so the burst reads as designed rather than generic. */
-const COLOURS = ['#4dabf7', '#3ed68b', ...SERIES.slice(0, 4)];
+/**
+ * The app's own colours, so the burst reads as designed rather than generic.
+ *
+ * Resolved from the stylesheet at fire time rather than imported as literals:
+ * the palette moved to CSS variables for theming, and confetti paints onto a
+ * canvas — it parses the colour itself and has no idea what `var()` means.
+ */
+const TOKENS = [
+  '--color-accent', '--color-good',
+  '--color-series-1', '--color-series-2', '--color-series-3', '--color-series-4',
+];
+
+function colours(): string[] {
+  const style = getComputedStyle(document.documentElement);
+  const resolved = TOKENS
+    .map((token) => style.getPropertyValue(token).trim())
+    .filter((value) => value !== '');
+  // Never hand confetti an empty list; it silently draws nothing.
+  return resolved.length > 0 ? resolved : ['#4dabf7'];
+}
 
 function prefersReducedMotion(): boolean {
   return (
@@ -36,7 +53,8 @@ export function useCelebration(muted: boolean) {
     if (prefersReducedMotion()) return;
 
     const common = {
-      colors: COLOURS,
+      // Read now, so the burst matches whichever theme is on screen.
+      colors: colours(),
       disableForReducedMotion: true,
       zIndex: 60,
       scalar: 1.1,

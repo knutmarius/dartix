@@ -146,10 +146,10 @@ export function PlayerPage() {
                 <YAxis domain={[0, 'auto']} tick={{ fill: CHART.axis, fontSize: 11 }} stroke={CHART.grid} tickLine={false} width={44} />
                 <Tooltip
                   contentStyle={{ background: CHART.surface, border: `1px solid ${CHART.line}`, borderRadius: 8 }}
-                  labelStyle={{ color: '#f3f4f6', fontWeight: 600 }}
+                  labelStyle={{ color: 'var(--color-ink)', fontWeight: 600 }}
                 />
                 <Legend verticalAlign="top" align="right" iconType="plainline" iconSize={14}
-                  wrapperStyle={{ paddingBottom: 10, fontSize: 13, color: '#9aa2ae' }} />
+                  wrapperStyle={{ paddingBottom: 10, fontSize: 13, color: 'var(--color-ink-2)' }} />
                 <Line name="Game score" type="linear" dataKey="score" stroke={SERIES[0]} strokeWidth={2}
                   dot={form.length <= 60 ? { r: 3, strokeWidth: 2, stroke: CHART.surface, fill: SERIES[0] } : false}
                   isAnimationActive={false} />
@@ -255,7 +255,7 @@ export function PlayerPage() {
                   <span className={`dsp w-6 shrink-0 text-base font-bold ${hot ? 'text-danger' : 'text-ink-2'}`}>
                     {round.key}
                   </span>
-                  <div className="h-3.5 grow overflow-hidden rounded bg-[#1c2027]">
+                  <div className="h-3.5 grow overflow-hidden rounded bg-raised">
                     <div
                       className={`h-full rounded ${hot ? 'bg-danger' : 'bg-ink-3'}`}
                       style={{ width: `${round.blankRate}%` }}

@@ -49,7 +49,7 @@ export function RunChart({
           />
           <Tooltip
             contentStyle={{ background: CHART.surface, border: `1px solid ${CHART.line}`, borderRadius: 8 }}
-            labelStyle={{ color: '#f3f4f6', fontWeight: 600 }}
+            labelStyle={{ color: 'var(--color-ink)', fontWeight: 600 }}
             itemSorter={(item) => -(item.value as number)}
           />
           {/* A legend is always present for two or more series, so identity is
@@ -59,7 +59,7 @@ export function RunChart({
             align="right"
             iconType="circle"
             iconSize={9}
-            wrapperStyle={{ paddingBottom: 12, fontSize: 13, color: '#9aa2ae' }}
+            wrapperStyle={{ paddingBottom: 12, fontSize: 13, color: 'var(--color-ink-2)' }}
           />
           {players.map((player, index) => (
             <Line

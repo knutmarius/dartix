@@ -27,6 +27,17 @@ export const ROUNDS: readonly Round[] = Object.freeze([
   { key: 'B',  label: 'B',  name: 'Bull',       kind: 'bull',   multiplier: 25, maxInput: 6,  resultField: 'ResultB'  },
 ] satisfies Round[]);
 
+/**
+ * Darts in a turn. Three, always.
+ *
+ * Every `maxInput` above is derived from it — 9 for a number round is three
+ * trebles, 60 for the doubles is three 20s, 6 for the bull is three
+ * bullseyes — but the count itself matters separately on the two rounds that
+ * take a sum, where the entry is built one dart at a time and nothing else
+ * would stop a fourth.
+ */
+export const DARTS_PER_TURN = 3;
+
 /** The round keys in playing order. */
 export const ROUND_KEYS: readonly RoundKey[] = Object.freeze(ROUNDS.map((r) => r.key));
 

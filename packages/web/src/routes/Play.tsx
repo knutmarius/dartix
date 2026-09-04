@@ -229,6 +229,7 @@ export function Play() {
           round={round.round}
           playerName={player.name}
           draft={shownDraft}
+          hits={shownHits}
           onCommit={enter}
           onAddFace={addToDraft}
           onClearDraft={() => { setTyped(null); clearDraft(); }}

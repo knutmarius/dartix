@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ROUNDS, ROUND_KEYS, roundFor, roundIndex } from './rounds.js';
+import { DARTS_PER_TURN, ROUNDS, ROUND_KEYS, roundFor, roundIndex } from './rounds.js';
 import {
   cursorFromOrdinal, halve, isComplete, missOutcome, ordinalFromCursor,
   pointsByRound, pointsFor, rankPlayers, standingsFor, totalFor, validateInput, walk,
@@ -357,6 +357,33 @@ describe('turn order', () => {
   it('round-trips', () => {
     for (let ordinal = 0; ordinal < 36; ordinal++) {
       expect(ordinalFromCursor(cursorFromOrdinal(ordinal, 3), 3)).toBe(ordinal);
+    }
+  });
+});
+
+describe('three darts a turn', () => {
+  it('is what every round ceiling is derived from', () => {
+    expect(DARTS_PER_TURN).toBe(3);
+
+    for (const round of ROUNDS) {
+      switch (round.kind) {
+        // Three trebles of the number.
+        case 'count':
+          expect(round.maxInput).toBe(DARTS_PER_TURN * 3);
+          break;
+        // Three 20s, summed as base numbers.
+        case 'sum':
+          expect(round.maxInput).toBe(DARTS_PER_TURN * 20);
+          break;
+        // Three bullseyes, each worth two units.
+        case 'bull':
+          expect(round.maxInput).toBe(DARTS_PER_TURN * 2);
+          break;
+        // Made or missed; the count does not enter into it.
+        case 'binary':
+          expect(round.maxInput).toBe(1);
+          break;
+      }
     }
   });
 });

@@ -1,3 +1,4 @@
+import { DARTS_PER_TURN } from '@dartix/core';
 import type { Round } from '@dartix/core';
 import { Button, Label } from './ui';
 
@@ -6,6 +7,8 @@ export interface EntryPadProps {
   playerName: string;
   /** Partial sum for the doubles and trebles rounds. */
   draft: number;
+  /** Which faces are behind that sum, so the pad can mark them. */
+  hits?: readonly number[];
   onCommit: (value: number) => void;
   onAddFace: (face: number) => void;
   onClearDraft: () => void;
@@ -95,6 +98,24 @@ function BullPad({ round, onCommit }: EntryPadProps) {
 }
 
 /**
+ * The darts as an expression, falling back to the plain total.
+ *
+ * Three darts is the real ceiling, but nothing stops a mis-tap adding more, so
+ * past four terms this groups repeats — "1 ×6 + 20" rather than a formula that
+ * outgrows its box.
+ */
+function sum(hits: readonly number[] | undefined, draft: number): string {
+  if (!hits || hits.length === 0) return String(draft);
+  if (hits.length <= 4) return hits.join(' + ');
+
+  const counts = new Map<number, number>();
+  for (const face of hits) counts.set(face, (counts.get(face) ?? 0) + 1);
+  return [...counts]
+    .map(([face, n]) => (n > 1 ? `${face}\u00d7${n}` : String(face)))
+    .join(' + ');
+}
+
+/**
  * The 41. All or nothing, so two buttons is the whole round.
  *
  * It gets blanked in 84% of real games, which is why the miss side carries the
@@ -138,7 +159,20 @@ function BinaryPad({ onCommit }: EntryPadProps) {
  * The old app made you sum the base numbers in your head before typing, which
  * is the one part of its input model that was actually wrong rather than dated.
  */
-function SumPad({ round, draft, onAddFace, onClearDraft, onCommitDraft, onCommit }: EntryPadProps) {
+function SumPad({
+  round, draft, hits, onAddFace, onClearDraft, onCommitDraft, onCommit,
+}: EntryPadProps) {
+  /*
+   * How many darts landed in each face. Two in D20 is ordinary, and the count
+   * has to be visible somewhere or the pad looks like nothing happened on the
+   * second tap — the button says "20 ×2" and the readout spells the sum out.
+   */
+  const taps = new Map<number, number>();
+  for (const face of hits ?? []) taps.set(face, (taps.get(face) ?? 0) + 1);
+
+  const thrown = hits?.length ?? 0;
+  const spent = thrown >= DARTS_PER_TURN;
+
   return (
     <div className="flex flex-col gap-3 lg:flex-row">
       <div className="grid grow grid-cols-5 gap-1.5 sm:grid-cols-10">
@@ -146,12 +180,29 @@ function SumPad({ round, draft, onAddFace, onClearDraft, onCommitDraft, onCommit
           <button
             key={face}
             onClick={() => onAddFace(face)}
-            disabled={draft + face > round.maxInput}
-            className="dsp h-9 rounded-md border border-line bg-raised text-[15px] font-semibold
-                       transition-colors hover:border-ink-3 disabled:opacity-30 disabled:hover:border-line
-                       sm:h-10 sm:text-[17px]"
+            disabled={spent || draft + face > round.maxInput}
+            aria-pressed={(taps.get(face) ?? 0) > 0}
+            aria-label={
+              (taps.get(face) ?? 0) > 1 ? `${face}, hit ${taps.get(face)} times` : String(face)
+            }
+            /* A face you have hit keeps its full green even once it is
+               disabled — it usually is, because a second dart in the same
+               double often takes you past the round's ceiling, and "you hit
+               this" outranks "you cannot add another". */
+            className={`dsp flex h-9 items-center justify-center gap-0.5 rounded-md border
+                        text-[15px] font-semibold transition-colors sm:h-10 sm:text-[17px] ${
+              taps.has(face)
+                ? 'border-good bg-good/20 text-good'
+                : 'border-line bg-raised hover:border-ink-3 disabled:opacity-30 disabled:hover:border-line'
+            }`}
           >
             {face}
+            {(taps.get(face) ?? 0) > 1 ? (
+              /* Smaller, so the face stays the thing you read first. */
+              <span className="text-[11px] font-bold opacity-80 sm:text-[12px]">
+                &times;{taps.get(face)}
+              </span>
+            ) : null}
           </button>
         ))}
       </div>
@@ -163,14 +214,27 @@ function SumPad({ round, draft, onAddFace, onClearDraft, onCommitDraft, onCommit
           className="flex grow items-center justify-center gap-2 rounded-lg border border-line
                      bg-ground px-3 py-1.5 lg:flex-col lg:gap-0.5 lg:py-3"
         >
-          <Label>{round.key === 'D' ? 'Doubles' : 'Trebles'}</Label>
-          <span className="dsp text-2xl leading-none font-bold lg:text-3xl">{draft}</span>
+          <Label className={spent ? 'text-good!' : ''}>
+            {round.key === 'D' ? 'Doubles' : 'Trebles'}
+            {/* The pad goes inert on the third dart, so it has to say why. */}
+            {thrown > 0 ? ` · ${thrown} of ${DARTS_PER_TURN}` : ''}
+          </Label>
+          {/* The darts, not their sum: "10 + 10" is checkable against what is
+              still stuck in the board, where "20" has to be taken on trust.
+              A typed total has no faces behind it, so it stays a total. */}
+          <span className="dsp text-2xl leading-none font-bold lg:text-3xl">{sum(hits, draft)}</span>
           <span className="dsp num text-[15px] font-semibold text-accent">
             = {draft * round.multiplier} pts
           </span>
         </div>
         <div className="flex gap-2">
-          <Button onClick={draft > 0 ? onClearDraft : () => onCommit(0)} className="grow">
+          {/* One button, two jobs — and when it is the one that halves you it
+              wears the halving colour, like every other way of blanking. */}
+          <Button
+            variant={draft > 0 ? 'default' : 'danger'}
+            onClick={draft > 0 ? onClearDraft : () => onCommit(0)}
+            className="grow"
+          >
             {draft > 0 ? 'Clear' : 'Blank it'}
           </Button>
           <Button variant="primary" onClick={onCommitDraft} className="grow-[2]">

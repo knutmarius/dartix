@@ -59,6 +59,17 @@ export function MobileBoard({
     return () => observer.disconnect();
   }, []);
 
+  /*
+   * Which three rounds are on screen.
+   *
+   * `null` follows the game. A number pins the window while you look back at
+   * something, and any entry unpins it — the cursor rule sends you to the
+   * first unfilled cell, the active round changes, and the window comes with
+   * you. So stepping back is always a temporary detour.
+   */
+  const [pinned, setPinned] = useState<number | null>(null);
+  useEffect(() => { setPinned(null); }, [activeRoundIndex]);
+
   const walks = new Map(players.map((p) => [p.id, walk(inputs[p.id] ?? {})]));
   const standings = rankPlayers(
     players.map((p) => ({ playerId: p.id, playerName: p.name, total: walks.get(p.id)!.total })),
@@ -66,9 +77,11 @@ export function MobileBoard({
   const positions = new Map(standings.map((s) => [s.playerId, s]));
   const leader = standings[0]?.total ?? 0;
 
-  // Slide the window so the active round is always its last column, except
-  // near the start where it would run off the front of the game.
-  const start = Math.max(0, Math.min(activeRoundIndex - (WINDOW - 1), ROUNDS.length - WINDOW));
+  // Following the game puts the active round in the last column, except near
+  // the start where that would run off the front.
+  const live = Math.max(0, Math.min(activeRoundIndex - (WINDOW - 1), ROUNDS.length - WINDOW));
+  // Never past the game: forwards only ever means "back towards now".
+  const start = pinned === null ? live : Math.max(0, Math.min(pinned, live));
   const columns = Array.from({ length: WINDOW }, (_, i) => start + i);
 
   const active = players[activePlayerIndex];
@@ -80,7 +93,7 @@ export function MobileBoard({
     <div className="flex min-h-0 grow flex-col">
       {/* Round, and how far through the game we are. Dots rather than twelve
           labels, which do not fit and are not the question being asked. */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-line-soft bg-[#14161b] px-4 py-2">
+      <div className="flex shrink-0 items-center gap-3 border-b border-line-soft bg-raised px-4 py-2">
         {/* The target itself is what a glance is looking for — "14", not
             "Fourteens" — so the number gets the accent block and the name
             drops to a gloss beneath the round counter. */}
@@ -94,12 +107,48 @@ export function MobileBoard({
           </span>
         </div>
         <div className="grow" />
-        <div className="flex gap-1">
+
+        {/*
+          * Stepping the three-round window.
+          *
+          * Three of twelve fit on a phone, so without this the earlier rounds
+          * are unreachable — you can neither check nor correct them. It lives
+          * up here because the round block already sets this row's height, so
+          * controls this size are free; in the standings header they made that
+          * row taller and cost a player row at seven players.
+          */}
+        <div className="flex shrink-0 items-center gap-1">
+          {start !== live ? (
+            <button
+              onClick={() => setPinned(null)}
+              className="label mr-0.5 rounded border border-accent/50 px-1.5 py-1 text-[9px]! text-accent!"
+            >
+              Now
+            </button>
+          ) : null}
+          {/* Functional updates, not `start - 1`: `start` is this render's
+              value, so three quick taps would all compute the same step and
+              the window would move once. */}
+          <Step
+            back
+            onClick={() => setPinned((at) => Math.max(0, (at ?? live) - 1))}
+            disabled={start === 0}
+          />
+          <Step
+            onClick={() => setPinned((at) => Math.min(live, (at ?? live) + 1))}
+            disabled={start >= live}
+          />
+        </div>
+
+        {/* Dots kept, a size down, and dropped altogether on a narrow phone:
+            they say the same thing as the counter above, so they are what
+            yields when the round name would otherwise clip. */}
+        <div className="hidden shrink-0 gap-[3px] min-[380px]:flex">
           {ROUNDS.map((r, i) => (
             <span
               key={r.key}
               title={r.name}
-              className={`size-2 rounded-full ${
+              className={`size-1.5 rounded-full ${
                 i === activeRoundIndex ? 'bg-accent' : i < activeRoundIndex ? 'bg-ink-3' : 'bg-ink-4/60'
               }`}
             />
@@ -116,6 +165,24 @@ export function MobileBoard({
             <span className="dsp truncate text-xl leading-none font-bold">{active.name}</span>
           </div>
           <div className="grow" />
+
+          {/* Was a grey caption above the names, which nobody found. Here it
+              is a control, in the gap the turn strip already had going spare. */}
+          <button
+            onClick={onRoster}
+            aria-label="Add or remove players"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-accent/45
+                       bg-accent/12 px-2.5 py-2 active:bg-accent/20"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
+              strokeLinecap="round" strokeLinejoin="round" className="size-4 text-accent" aria-hidden>
+              <path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20" />
+              <circle cx="10" cy="8" r="3.2" />
+              <path d="M19 8.5v5M21.5 11h-5" />
+            </svg>
+            <span className="dsp text-[15px] leading-none font-bold text-accent">{players.length}</span>
+          </button>
+
           <div className="flex flex-col items-end">
             <span className="dsp num text-2xl leading-none font-bold">{activeTotal}</span>
             <span className="num text-[11px] font-semibold text-danger">
@@ -128,17 +195,7 @@ export function MobileBoard({
       {/* Standings, with the three-round window. */}
       <div className="flex min-h-0 grow flex-col px-3 pt-1.5">
         <div className="flex shrink-0 items-end pb-1.5">
-          {/* This cell was empty and sits directly above the names, which is
-              exactly where a control over who is playing belongs. */}
-          <div className="flex w-[38%] shrink-0 items-center">
-            <button onClick={onRoster} className="label flex items-center gap-1 text-[10px]! text-ink-3">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
-                strokeLinecap="round" className="size-3" aria-hidden>
-                <path d="M12 5v14" /><path d="M5 12h14" />
-              </svg>
-              {players.length} playing
-            </button>
-          </div>
+          <div className="w-[38%] shrink-0" />
           <div className="flex grow">
             {columns.map((i) => (
               <div key={ROUNDS[i]!.key} className="flex-1 text-center">
@@ -267,6 +324,26 @@ export function MobileBoard({
         ) : null}
       </AnimatePresence>
     </div>
+  );
+}
+
+/** One round back or forward through the visible window. */
+function Step({
+  onClick, disabled, back = false,
+}: { onClick: () => void; disabled: boolean; back?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={back ? 'Earlier rounds' : 'Later rounds'}
+      className="grid size-8 shrink-0 place-items-center rounded-md border border-line
+                 text-ink-2 active:bg-raised disabled:border-line-soft disabled:text-ink-4"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"
+        strokeLinecap="round" strokeLinejoin="round" className="size-3.5" aria-hidden>
+        <path d={back ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} />
+      </svg>
+    </button>
   );
 }
 

@@ -79,7 +79,7 @@ export function Leaderboard() {
               <Link
                 key={row.playerId}
                 to={`/stats/player/${row.playerId}`}
-                className="flex h-15 items-center border-b border-line-soft transition-colors last:border-0 hover:bg-white/3"
+                className="flex h-15 items-center border-b border-line-soft transition-colors last:border-0 hover:bg-ink/5"
               >
                 <div className="flex w-56 shrink-0 items-center gap-3">
                   <span className={`dsp w-4 text-[15px] font-bold ${index === 0 ? 'text-accent' : 'text-ink-3'}`}>
