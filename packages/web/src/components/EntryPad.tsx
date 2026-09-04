@@ -47,6 +47,16 @@ export function EntryPad(props: EntryPadProps) {
   );
 }
 
+/*
+ * The key grid, shared by the two pads that have a row of numbered keys.
+ *
+ * `auto-rows-fr` makes the rows split the height evenly, `grow` gives them
+ * the height to split, and `max-h` stops keys from stretching into slivers
+ * when the card beside them is very tall.
+ */
+const GRID = 'grid grid-cols-5 gap-2 sm:grid-cols-10 lg:grid-cols-5 lg:max-h-[38vh] lg:grow lg:auto-rows-fr lg:gap-3';
+const GRID_BULL = 'grid grid-cols-4 gap-2 sm:grid-cols-7 lg:grid-cols-4 lg:max-h-[38vh] lg:grow lg:auto-rows-fr lg:gap-3';
+
 function Chip({
   value, points, onPick, wide = false,
 }: { value: number; points: number; onPick: () => void; wide?: boolean }) {
@@ -54,7 +64,10 @@ function Chip({
   return (
     <button
       onClick={onPick}
-      className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg border transition-colors sm:h-18 ${
+      /* `lg:h-full` so the grid's row height decides the key size. Below lg
+         the pad sits in a fixed-height phone shell where a growing key would
+         eat the standings, so the fixed heights stay. */
+      className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg border transition-colors sm:h-18 lg:h-full ${
         blank
           ? 'border-danger/45 bg-danger/12 hover:bg-danger/20'
           : 'border-line bg-raised hover:border-ink-3'
@@ -73,7 +86,17 @@ function Chip({
 /** Number rounds: how many segments, counting a treble as three. */
 function CountPad({ round, onCommit }: EntryPadProps) {
   return (
-    <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
+    /*
+     * Ten keys in one row of ten on a laptop; five by two from lg up.
+     *
+     * The card's height is set by the turn card beside it, which carries a
+     * full-size dartboard — so on a tablet in landscape a single row of keys
+     * left roughly 450px of nothing underneath and each key only 55×72. Two
+     * rows filling the space give a key near enough square and twice the
+     * size, which is what a touch screen wants. `max-h` because ten keys
+     * stretched over the whole card would be slivers, not buttons.
+     */
+    <div className={GRID}>
       {Array.from({ length: round.maxInput + 1 }, (_, value) => (
         <Chip key={value} value={value} points={value * round.multiplier} onPick={() => onCommit(value)} />
       ))}
@@ -84,8 +107,8 @@ function CountPad({ round, onCommit }: EntryPadProps) {
 /** Bull: units of 25, a bullseye counting two. */
 function BullPad({ round, onCommit }: EntryPadProps) {
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+    <div className="flex grow flex-col gap-2.5">
+      <div className={GRID_BULL}>
         {Array.from({ length: round.maxInput + 1 }, (_, value) => (
           <Chip key={value} value={value} points={value * round.multiplier} onPick={() => onCommit(value)} />
         ))}
@@ -132,7 +155,7 @@ function BinaryPad({ onCommit }: EntryPadProps) {
      * the turn card beside it, which since the card grew a full-size
      * dartboard would blow these two up to 650px tall.
      */
-    <div className="flex gap-3">
+    <div className="flex gap-3 lg:max-h-[38vh] lg:grow">
       <button
         onClick={() => onCommit(1)}
         className="flex flex-1 basis-0 flex-col items-center justify-center gap-1 rounded-xl border border-good/45 bg-good/12 py-4 transition-colors hover:bg-good/20 sm:py-6"
@@ -174,8 +197,11 @@ function SumPad({
   const spent = thrown >= DARTS_PER_TURN;
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row">
-      <div className="grid grow grid-cols-5 gap-1.5 sm:grid-cols-10">
+    <div className="flex grow flex-col gap-3 lg:flex-row">
+      {/* Four rows of five from lg. The cap is what keeps the fourth row and
+          the Enter key above the fold on a short landscape tablet. */}
+      <div className="grid grow grid-cols-5 gap-1.5 sm:grid-cols-10 lg:grid-cols-5
+                      lg:max-h-[40vh] lg:auto-rows-fr lg:gap-2">
         {Array.from({ length: 20 }, (_, i) => i + 1).map((face) => (
           <button
             key={face}
@@ -190,7 +216,8 @@ function SumPad({
                double often takes you past the round's ceiling, and "you hit
                this" outranks "you cannot add another". */
             className={`dsp flex h-9 items-center justify-center gap-0.5 rounded-md border
-                        text-[15px] font-semibold transition-colors sm:h-10 sm:text-[17px] ${
+                        text-[15px] font-semibold transition-colors sm:h-10 sm:text-[17px]
+                        lg:h-full lg:text-[19px] ${
               taps.has(face)
                 ? 'border-good bg-good/20 text-good'
                 : 'border-line bg-raised hover:border-ink-3 disabled:opacity-30 disabled:hover:border-line'
@@ -207,12 +234,22 @@ function SumPad({
         ))}
       </div>
 
-      <div className="flex shrink-0 flex-col gap-2 lg:w-48">
+      {/*
+        * Aligned to the key grid, not to the card.
+        *
+        * `justify-between` puts the readout level with the top row and the
+        * buttons level with the bottom one; the card itself is taller than
+        * both because the turn card beside it is, and letting the buttons
+        * follow the card pushed them off the bottom of a short screen.
+        */}
+      <div className="flex shrink-0 flex-col gap-2 lg:h-[40vh] lg:justify-between lg:w-48">
         {/* Inline on a phone: stacked, this readout is the tallest element in
             the tallest pad, and the height comes straight off the standings. */}
+        {/* `grow` fills the width when this sits inline on a phone; from lg
+            it stops growing so the box is only as tall as what it says. */}
         <div
           className="flex grow items-center justify-center gap-2 rounded-lg border border-line
-                     bg-ground px-3 py-1.5 lg:flex-col lg:gap-0.5 lg:py-3"
+                     bg-ground px-3 py-1.5 lg:grow-0 lg:flex-col lg:gap-0.5 lg:py-3"
         >
           <Label className={spent ? 'text-good!' : ''}>
             {round.key === 'D' ? 'Doubles' : 'Trebles'}

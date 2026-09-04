@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROUNDS, rankPlayers, walk } from '@dartix/core';
-import type { RoundInputs, RoundKey } from '@dartix/core';
+import type { RoundInputs } from '@dartix/core';
 import type { GamePlayer } from '../store/game';
 import { Avatar, Label } from './ui';
 
@@ -9,9 +9,6 @@ export interface BoardProps {
   inputs: Record<string, RoundInputs>;
   activeRoundIndex: number;
   activePlayerIndex: number;
-  /** Historical mean points per round, per player. Empty until it loads. */
-  averages: Map<string, Map<RoundKey, number>>;
-  showTrend: boolean;
   onPick: (roundIndex: number, playerIndex: number) => void;
 }
 
@@ -23,9 +20,28 @@ export interface BoardProps {
  * players — and real games here run to seven.
  */
 export function Board({
-  players, inputs, activeRoundIndex, activePlayerIndex, averages, showTrend, onPick,
+  players, inputs, activeRoundIndex, activePlayerIndex, onPick,
 }: BoardProps) {
   const walks = new Map(players.map((p) => [p.id, walk(inputs[p.id] ?? {})]));
+
+  /*
+   * The best score in each round so far, among the people actually playing.
+   *
+   * This replaces a caret comparing each entry against that player's own
+   * historical average. That answered a question nobody asks mid-game — and
+   * it cost a profile request per player on entering a game. Who is winning
+   * the round in front of you is the question, and it needs no history.
+   *
+   * Zero is not a high score, so a round everybody blanked gets no dot.
+   */
+  const bestInRound = ROUNDS.map((_round, index) => {
+    let best = 0;
+    for (const player of players) {
+      const cell = walks.get(player.id)!.cells[index]!;
+      if (cell.played && cell.points > best) best = cell.points;
+    }
+    return best;
+  });
   const standings = rankPlayers(
     players.map((p) => ({
       playerId: p.id,
@@ -117,19 +133,15 @@ export function Board({
               <div className="grid grow grid-cols-12">
                 {state.cells.map((cell, roundIndex) => {
                   const isActive = roundIndex === activeRoundIndex && playerIndex === activePlayerIndex;
-                  const average = averages.get(player.id)?.get(cell.key);
-                  const beat = cell.played && !cell.halved && average !== undefined && cell.points >= average;
-                  const under = cell.played && !cell.halved && average !== undefined && cell.points < average;
+                  // Ties all get a dot: sharing the best is still holding it.
+                  const leadsRound =
+                    cell.played && cell.points > 0 && cell.points === bestInRound[roundIndex];
 
                   return (
                     <button
                       key={cell.key}
                       onClick={() => onPick(roundIndex, playerIndex)}
-                      title={
-                        average === undefined
-                          ? undefined
-                          : `${ROUNDS[roundIndex]!.name} — your average is ${average}`
-                      }
+                      title={leadsRound ? `Best ${ROUNDS[roundIndex]!.name} so far` : undefined}
                       /* A translucent line, not `line-soft`: that is an
                          opaque grey of much the same lightness as the tint on
                          the leader's row, so on that one row the separators
@@ -160,8 +172,12 @@ export function Board({
                         </AnimatePresence>
                       )}
 
-                      {showTrend && beat ? <Caret up /> : null}
-                      {showTrend && under ? <Caret /> : null}
+                      {leadsRound ? (
+                        <span
+                          aria-label="best in this round"
+                          className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-good"
+                        />
+                      ) : null}
                       {cell.halved ? (
                         <span className="num text-[10px] leading-none font-semibold text-danger">
                           {cell.delta}
@@ -192,14 +208,5 @@ export function Board({
         })}
       </div>
     </div>
-  );
-}
-
-/** Above or below this player's own average for the round. */
-function Caret({ up = false }: { up?: boolean }) {
-  return (
-    <svg viewBox="0 0 9 6" className={`mt-0.5 h-1.5 w-2.5 ${up ? 'fill-good' : 'fill-ink-3'}`} aria-hidden>
-      <path d={up ? 'M4.5 0 9 6H0z' : 'M4.5 6 0 0h9z'} />
-    </svg>
   );
 }

@@ -35,3 +35,19 @@ export function useFailSound(muted: boolean) {
 export function useApplause(muted: boolean) {
   return useSoundEffect('/sounds/applause.mp3', muted);
 }
+
+/**
+ * For anyone still on nought when the bull comes round.
+ *
+ * Reaching the twelfth round without scoring means every one of the eleven
+ * before it was blanked — halving nothing, over and over. It is the worst
+ * thing that can happen to you at this board, and it has a song.
+ */
+export function useMexico(muted: boolean) {
+  return useSoundEffect('/sounds/Mexico.mp3', muted);
+}
+
+/** Relief: off nought at last, with the closing rounds still in hand. */
+export function usePhew(muted: boolean) {
+  return useSoundEffect('/sounds/Phew.mp3', muted);
+}

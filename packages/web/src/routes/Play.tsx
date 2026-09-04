@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { ROUNDS, halve, walk } from '@dartix/core';
+import type { RoundKey } from '@dartix/core';
 import {
   activePlayer, activeRound, hasGameInProgress, isFinished, useGame,
 } from '../store/game';
-import { useHistoricalAverages } from '../lib/useHistoricalAverages';
-import { useFailSound } from '../lib/useSound';
+import { useFailSound, useMexico, usePhew } from '../lib/useSound';
 import { Board } from '../components/Board';
 import { MobileBoard } from '../components/MobileBoard';
 import { EntryPad } from '../components/EntryPad';
@@ -15,6 +15,9 @@ import { Button, Label } from '../components/ui';
 
 /** A halving worth more than this plays the trombone, as it always has. */
 const TROMBONE_THRESHOLD = 150;
+
+/** Late enough that finally scoring is a relief rather than a start. */
+const RELIEF_ROUNDS = new Set<RoundKey>(['19', '20', 'B']);
 
 export function Play() {
   const navigate = useNavigate();
@@ -28,8 +31,9 @@ export function Play() {
   const [showHelp, setShowHelp] = useState(false);
   const [showRoster, setShowRoster] = useState(false);
 
-  const averages = useHistoricalAverages(players);
   const playTrombone = useFailSound(muted);
+  const playMexico = useMexico(muted);
+  const playPhew = usePhew(muted);
 
   const round = activeRound(game);
   const player = activePlayer(game);
@@ -37,20 +41,38 @@ export function Play() {
 
   const total = player ? walk(inputs[player.id] ?? {}).total : 0;
 
-  /** Commit, sounding the trombone first if this blank is an expensive one. */
+  /** Commit, with whatever the entry deserves to be announced by. */
   const enter = useCallback(
     (value: number) => {
       if (!round) return;
       if (value === 0 && total - halve(total) > TROMBONE_THRESHOLD) playTrombone();
+      // Off nought, in the closing rounds — the total before this entry is
+      // only knowable here, which is why it is not an effect.
+      if (total === 0 && value > 0 && RELIEF_ROUNDS.has(round.round.key)) playPhew();
       setTyped(null);
       commit(value);
     },
-    [round, total, playTrombone, commit],
+    [round, total, playTrombone, playPhew, commit],
   );
 
   useEffect(() => {
     if (finished && !reviewing) navigate('/play/summary', { replace: true });
   }, [finished, reviewing, navigate]);
+
+  /*
+   * Mexico, for arriving at the bull still on nought.
+   *
+   * Keyed on the player so it sounds once when they step up, not on every
+   * re-render while they stand there — and again for the next player in the
+   * same predicament.
+   */
+  const doomed = round?.round.key === 'B' && total === 0 && player ? player.id : null;
+  const announced = useRef<string | null>(null);
+  useEffect(() => {
+    if (doomed === null || announced.current === doomed) return;
+    announced.current = doomed;
+    playMexico();
+  }, [doomed, playMexico]);
 
   const done = useCallback(() => {
     endReview();
@@ -197,8 +219,6 @@ export function Play() {
           inputs={inputs}
           activeRoundIndex={round.index}
           activePlayerIndex={playerIndex}
-          averages={averages}
-          showTrend
           onPick={jumpTo}
         />
       </div>

@@ -28,7 +28,12 @@ export function TurnCard({
       <div className="h-px bg-line-soft" />
 
       {/*
-        * Where to throw, at the full width of the card.
+        * Where to throw.
+        *
+        * Smaller from lg to xl than above it, because that band is mostly a
+        * tablet in landscape — 810 or 820 pixels tall — and a 330px board
+        * there pushed the entry pad's bottom row and its Enter key below the
+        * fold. Above xl the height is there and the board takes it.
         *
         * It started beside the instruction at 124px, which is small enough
         * that the treble band is two pixels and the number ring is mud. The
@@ -36,7 +41,7 @@ export function TurnCard({
         * "where" faster than the sentence does, and the sentence is only
         * really needed on the two rounds that take a sum.
         */}
-      <div className="mx-auto aspect-square w-full max-w-[330px]">
+      <div className="mx-auto aspect-square w-full max-w-[190px] xl:max-w-[330px]">
         <Dartboard round={round} hits={hits} />
       </div>
 

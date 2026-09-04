@@ -218,8 +218,15 @@ export function PlayerPage() {
                 <PolarAngleAxis dataKey="round" tick={{ fill: CHART.axis, fontSize: 12 }} />
                 <Tooltip
                   contentStyle={{ background: CHART.surface, border: `1px solid ${CHART.line}`, borderRadius: 8 }}
-                  formatter={(value: number, _name, item) =>
-                    [`${value}% of best · ${(item.payload as { average: number }).average} avg`, 'This round']}
+                  /* Recharts 3 widened this: `value` arrives as
+                     `number | string | readonly (number|string)[] | undefined`,
+                     so it cannot be annotated as a number any more. Narrow
+                     here instead of asserting. */
+                  formatter={(value, _name, item) => {
+                    const share = typeof value === 'number' ? value : Number(value ?? 0);
+                    const { average } = (item?.payload ?? {}) as { average?: number };
+                    return [`${share}% of best · ${average ?? '–'} avg`, 'This round'];
+                  }}
                 />
                 <Radar name={p.playerName} dataKey="you" stroke={SERIES[0]} strokeWidth={2}
                   fill={SERIES[0]} fillOpacity={0.18} isAnimationActive={false} />

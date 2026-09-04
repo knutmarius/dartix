@@ -1,10 +1,24 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#101114" />
+    <!-- Browser chrome follows the theme. Two entries rather than one, or the
+         address bar stays night-black behind a white page. -->
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101114" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f7f9" />
     <title>DartiX</title>
+
+    <!-- A bullseye: the twenty wedges the app draws in the game are illegible
+         at 16px. SVG first for anything modern, PNGs for what is not, and the
+         .ico because browsers ask for /favicon.ico whether it is linked or
+         not. The touch icon is a separate square drawing — iOS masks the
+         corners itself. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
